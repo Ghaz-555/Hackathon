@@ -1,35 +1,73 @@
 import math
+import random
 
 
-def dot_product(vector1, vector2):
-    total = 0
-
-    for i in range(len(vector1)):
-        total += vector1[i] * vector2[i]
-
-    return total
+def dot_product(a, b):
+    return sum(x * y for x, y in zip(a, b))
 
 
-def softmax(numbers):
-    exponentials = [math.exp(number) for number in numbers]
-    total = sum(exponentials)
+def softmax(values):
+    max_value = max(values)
+    exp_values = [math.exp(v - max_value) for v in values]
+    total = sum(exp_values)
+    return [v / total for v in exp_values]
 
-    return [number / total for number in exponentials]
+
+def create_matrix(size):
+    return [
+        [random.uniform(-0.1, 0.1) for _ in range(size)]
+        for _ in range(size)
+    ]
 
 
-def calculate_attention(tokens, embeddings):
-    attention = {}
+def matrix_vector(vector, matrix):
+    result = []
 
-    for current_word in tokens:
+    for column in range(len(matrix[0])):
+        value = 0
+
+        for row in range(len(vector)):
+            value += vector[row] * matrix[row][column]
+
+        result.append(value)
+
+    return result
+
+
+def causal_self_attention(inputs):
+    embedding_size = len(inputs[0])
+
+    # Learnable Q, K and V weight matrices
+    W_q = create_matrix(embedding_size)
+    W_k = create_matrix(embedding_size)
+    W_v = create_matrix(embedding_size)
+
+    queries = [matrix_vector(x, W_q) for x in inputs]
+    keys = [matrix_vector(x, W_k) for x in inputs]
+    values = [matrix_vector(x, W_v) for x in inputs]
+
+    attention_weights = []
+    outputs = []
+
+    for i in range(len(inputs)):
         scores = []
 
-        for other_word in tokens:
-            score = dot_product(
-                embeddings[current_word],
-                embeddings[other_word]
-            )
+        # Causal attention:
+        # position i can only look at positions <= i
+        for j in range(i + 1):
+            score = dot_product(queries[i], keys[j])
+            score /= math.sqrt(embedding_size)
             scores.append(score)
 
-        attention[current_word] = softmax(scores)
+        weights = softmax(scores)
+        attention_weights.append(weights)
 
-    return attention
+        output = [0.0] * embedding_size
+
+        for j, weight in enumerate(weights):
+            for k in range(embedding_size):
+                output[k] += weight * values[j][k]
+
+        outputs.append(output)
+
+    return outputs, attention_weights
