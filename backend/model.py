@@ -135,10 +135,11 @@ class GlassBoxModel:
         hidden_state = result["attention_output"][-1]
 
         # Calculate gradients
-        d_logits, d_output_weights = output_layer_gradients(
+        d_logits, d_output_weights, d_hidden_state = output_layer_gradients(
             hidden_state,
             probabilities,
-            correct_index
+            correct_index,
+            self.output_weights
         )
 
         # Update output weights
@@ -153,7 +154,8 @@ class GlassBoxModel:
         return {
             "loss": new_loss,
             "d_logits": d_logits,
-            "d_output_weights": d_output_weights
+            "d_output_weights": d_output_weights,
+            "d_hidden_state": d_hidden_state
         }
     
     
@@ -204,3 +206,38 @@ class GlassBoxModel:
             "average_loss": average_loss,
             "examples_seen": len(examples)
         }
+    def generate(
+        self,
+        prompt,
+        length=20,
+        temperature=1.0,
+        seed=42
+    ):
+        rng = np.random.default_rng(seed)
+
+        generated_text = prompt
+
+        characters = [
+            self.id_to_character[i]
+            for i in range(len(self.vocabulary))
+        ]
+
+        for _ in range(length):
+            result = self.forward(
+                generated_text,
+                temperature=temperature
+            )
+
+            probabilities = np.array([
+                result["probabilities"][character]
+                for character in characters
+            ])
+
+            next_character = rng.choice(
+                characters,
+                p=probabilities
+            )
+
+            generated_text += next_character
+
+        return generated_text

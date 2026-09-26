@@ -120,3 +120,23 @@ for epoch in range(10):
         f"train = {train_result['average_loss']:.4f}, "
         f"held-out = {held_out_result['average_loss']:.4f}"
     )
+
+print("\n--- Seeded Generation Test ---")
+
+generation_1 = model.generate(
+    prompt="the",
+    length=20,
+    temperature=1.0,
+    seed=42
+)
+
+generation_2 = model.generate(
+    prompt="the",
+    length=20,
+    temperature=1.0,
+    seed=42
+)
+
+print("Generation 1:", generation_1)
+print("Generation 2:", generation_2)
+print("Same result:", generation_1 == generation_2)
