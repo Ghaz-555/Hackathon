@@ -21,9 +21,9 @@ Glasswork is basically an interactive learning lab, that makes language models e
     - return real model predictions, traces and training matricies
 3. Backend (Python + Numpy transformer)
     - Forward pass modules and backpropagation functions
-    - Saved weights, tokenizer, and optimizer state.
+    - Model weights, tokenizer, and training state are maintained for each learner session.
 
 
 ## current scope
-The model will roughly have 10k - 30k parameters and learns from a small, original character-level dataset. It is an educational example, NOT A GENERAL-PURPOSE CHATBOT. The site includes temperature and learning lessons. Its architecture illustration is conceptual. Interactive 3D model exploration and GeminiAPI-powered explanations are planned for later stages.
+The model is intentionally small and learns from a character-level dataset so learners can inspect its behavior and training in real time. It is an educational example, NOT A GENERAL-PURPOSE CHATBOT. The site includes temperature and learning lessons. Its architecture illustration is conceptual. Interactive 3D model exploration and GeminiAPI-powered explanations are planned for later stages.
 
