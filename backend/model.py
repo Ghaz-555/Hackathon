@@ -1,4 +1,5 @@
 import numpy as np
+from dataset import create_training_examples
 from gradients import output_layer_gradients
 from loss import cross_entropy_loss
 from tokenizer import tokenize, build_vocabulary
@@ -153,4 +154,53 @@ class GlassBoxModel:
             "loss": new_loss,
             "d_logits": d_logits,
             "d_output_weights": d_output_weights
+        }
+    
+    
+    def train_epoch(self, text, learning_rate=0.1):
+        examples = create_training_examples(
+            text,
+            self.context_length
+        )
+
+        total_loss = 0.0
+
+        for input_text, correct_character in examples:
+            result = self.train_step(
+                input_text,
+                correct_character,
+                learning_rate
+            )
+
+            total_loss += result["loss"]
+
+        average_loss = total_loss / len(examples)
+
+        return {
+            "average_loss": average_loss,
+            "examples_seen": len(examples)
+        }
+    
+    
+    def evaluate(self, text):
+        examples = create_training_examples(
+            text,
+            self.context_length
+        )
+
+        total_loss = 0.0
+
+        for input_text, correct_character in examples:
+            loss = self.calculate_loss(
+                input_text,
+                correct_character
+            )
+
+            total_loss += loss
+
+        average_loss = total_loss / len(examples)
+
+        return {
+            "average_loss": average_loss,
+            "examples_seen": len(examples)
         }

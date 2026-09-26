@@ -82,3 +82,41 @@ after_loss = model.calculate_loss(
 )
 
 print("Loss after training:", round(after_loss, 4))
+
+
+print("\n--- Dataset Training Test ---")
+
+dataset_text = "the cat sat on the mat"
+
+for epoch in range(10):
+    result = model.train_epoch(
+        dataset_text,
+        learning_rate=0.1
+    )
+
+    print(
+        f"Epoch {epoch + 1}: "
+        f"average loss = {result['average_loss']:.4f}"
+    )
+
+
+print("\n--- Training vs Held-Out Test ---")
+
+train_text = "the cat sat on the mat"
+held_out_text = "the mat sat on the cat"
+
+for epoch in range(10):
+    train_result = model.train_epoch(
+        train_text,
+        learning_rate=0.1
+    )
+
+    held_out_result = model.evaluate(
+        held_out_text
+    )
+
+    print(
+        f"Epoch {epoch + 1}: "
+        f"train = {train_result['average_loss']:.4f}, "
+        f"held-out = {held_out_result['average_loss']:.4f}"
+    )
