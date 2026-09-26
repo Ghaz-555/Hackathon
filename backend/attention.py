@@ -34,13 +34,8 @@ def matrix_vector(vector, matrix):
     return result
 
 
-def causal_self_attention(inputs):
+def causal_self_attention(inputs, W_q, W_k, W_v):
     embedding_size = len(inputs[0])
-
-    # Learnable Q, K and V weight matrices
-    W_q = create_matrix(embedding_size)
-    W_k = create_matrix(embedding_size)
-    W_v = create_matrix(embedding_size)
 
     queries = [matrix_vector(x, W_q) for x in inputs]
     keys = [matrix_vector(x, W_k) for x in inputs]

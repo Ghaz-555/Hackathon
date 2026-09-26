@@ -9,14 +9,34 @@ model = GlassBoxModel(
     context_length=128
 )
 
-result = model.forward("the cat")
+prompt = "the ca"
 
-print("Tokens:")
-print(result["tokens"])
+temperatures = [0.2, 1.0, 2.0]
 
-print("\nAttention:")
-for position, weights in enumerate(result["attention_weights"]):
-    print(
-        f"Position {position} ({result['tokens'][position]!r}) ->",
-        [round(weight, 3) for weight in weights]
+for temperature in temperatures:
+
+    result = model.forward(
+        prompt,
+        temperature=temperature
     )
+
+    probabilities = result["probabilities"]
+
+    # Sort characters from most likely to least likely
+    sorted_probabilities = sorted(
+        probabilities.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+    print(f"\n--- Temperature: {temperature} ---")
+
+    for character, probability in sorted_probabilities:
+        display_character = (
+            "[SPACE]" if character == " " else character
+        )
+
+        print(
+            f"{display_character}: "
+            f"{probability * 100:.2f}%"
+        )
