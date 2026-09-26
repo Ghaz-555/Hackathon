@@ -1,3 +1,4 @@
+from loss import cross_entropy_loss
 from tokenizer import tokenize, build_vocabulary
 from embeddings import create_embeddings
 from positional import (
@@ -99,3 +100,16 @@ class GlassBoxModel:
             "probabilities": next_character_probabilities,
             "temperature": temperature
         }
+
+    def calculate_loss(self, text, correct_character, temperature=1.0):
+        result = self.forward(
+            text,
+            temperature=temperature
+        )
+
+        loss = cross_entropy_loss(
+            result["probabilities"],
+            correct_character
+        )
+
+        return loss

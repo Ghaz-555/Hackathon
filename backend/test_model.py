@@ -22,7 +22,6 @@ for temperature in temperatures:
 
     probabilities = result["probabilities"]
 
-    # Sort characters from most likely to least likely
     sorted_probabilities = sorted(
         probabilities.items(),
         key=lambda item: item[1],
@@ -40,3 +39,14 @@ for temperature in temperatures:
             f"{display_character}: "
             f"{probability * 100:.2f}%"
         )
+
+
+print("\n--- Loss Test ---")
+
+loss = model.calculate_loss(
+    "the ca",
+    correct_character="t"
+)
+
+print("Correct next character: 't'")
+print("Loss:", round(loss, 4))
