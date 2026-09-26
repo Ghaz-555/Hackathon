@@ -50,3 +50,35 @@ loss = model.calculate_loss(
 
 print("Correct next character: 't'")
 print("Loss:", round(loss, 4))
+
+
+print("\n--- Training Test ---")
+
+training_prompt = "the ca"
+correct_character = "t"
+
+before_loss = model.calculate_loss(
+    training_prompt,
+    correct_character
+)
+
+print("Loss before training:", round(before_loss, 4))
+
+for step in range(10):
+    training_result = model.train_step(
+        training_prompt,
+        correct_character,
+        learning_rate=0.1
+    )
+
+    print(
+        f"Step {step + 1}: "
+        f"loss = {training_result['loss']:.4f}"
+    )
+
+after_loss = model.calculate_loss(
+    training_prompt,
+    correct_character
+)
+
+print("Loss after training:", round(after_loss, 4))

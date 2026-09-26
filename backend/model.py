@@ -1,3 +1,5 @@
+import numpy as np
+from gradients import output_layer_gradients
 from loss import cross_entropy_loss
 from tokenizer import tokenize, build_vocabulary
 from embeddings import create_embeddings
@@ -113,3 +115,42 @@ class GlassBoxModel:
         )
 
         return loss
+
+    def train_step(self, text, correct_character, learning_rate=0.1):
+        # Forward pass
+        result = self.forward(text, temperature=1.0)
+
+        probabilities_dict = result["probabilities"]
+
+        # Convert probability dictionary back into an array
+        probabilities = np.array([
+            probabilities_dict[self.id_to_character[i]]
+            for i in range(len(self.vocabulary))
+        ])
+
+        correct_index = self.vocabulary[correct_character]
+
+        # Final hidden state used for next-character prediction
+        hidden_state = result["attention_output"][-1]
+
+        # Calculate gradients
+        d_logits, d_output_weights = output_layer_gradients(
+            hidden_state,
+            probabilities,
+            correct_index
+        )
+
+        # Update output weights
+        self.output_weights -= learning_rate * d_output_weights
+
+        # Calculate loss AFTER the update
+        new_loss = self.calculate_loss(
+            text,
+            correct_character
+        )
+
+        return {
+            "loss": new_loss,
+            "d_logits": d_logits,
+            "d_output_weights": d_output_weights
+        }
