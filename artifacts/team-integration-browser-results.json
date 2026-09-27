@@ -1,0 +1,30 @@
+{
+  "browser": "Chromium",
+  "result": "PASS",
+  "checks": [
+    "real inference",
+    "temperature preserves weights",
+    "seeded generation",
+    "quiz feedback",
+    "random reset",
+    "one training step",
+    "25 live updates",
+    "loss history",
+    "before/after comparison",
+    "checkpoint restore",
+    "input validation",
+    "attention trace",
+    "model notes",
+    "mobile overflow",
+    "stop between training steps",
+    "Escape closes dialog",
+    "external requests blocked",
+    "greedy zero-probability bars",
+    "team-engine identity and parameter counts",
+    "single-head selectors",
+    "uppercase normalization",
+    "40-character prompt",
+    "accurate training scope"
+  ],
+  "page_errors": []
+}

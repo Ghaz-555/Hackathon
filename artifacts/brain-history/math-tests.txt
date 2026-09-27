@@ -1,0 +1,62 @@
+npm notice run glasswork-brain-demo@0.1.0 test
+npm notice run node --experimental-transform-types tests/math.test.ts
+(node:24) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: export has the pinned GPT-2 shape, token IDs and checksum
+ok 1 - export has the pinned GPT-2 shape, token IDs and checksum
+  ---
+  duration_ms: 12.569242
+  type: 'test'
+  ...
+# Subtest: PCA coordinates reproduce the Python export for every token
+ok 2 - PCA coordinates reproduce the Python export for every token
+  ---
+  duration_ms: 101.821244
+  type: 'test'
+  ...
+# Subtest: projection is affine for A - B + C
+ok 3 - projection is affine for A - B + C
+  ---
+  duration_ms: 1.152303
+  type: 'test'
+  ...
+# Subtest: self similarity is one and exclusion removes self
+ok 4 - self similarity is one and exclusion removes self
+  ---
+  duration_ms: 27.290651
+  type: 'test'
+  ...
+# Subtest: analogy matches independent NumPy reference ranking and scores
+ok 5 - analogy matches independent NumPy reference ranking and scores
+  ---
+  duration_ms: 19.354526
+  type: 'test'
+  ...
+# Subtest: subtracting a vector from itself leaves the remaining vector
+ok 6 - subtracting a vector from itself leaves the remaining vector
+  ---
+  duration_ms: 11.876455
+  type: 'test'
+  ...
+# Subtest: zero-vector cosine and corrupt vector files fail clearly
+ok 7 - zero-vector cosine and corrupt vector files fail clearly
+  ---
+  duration_ms: 1.365205
+  type: 'test'
+  ...
+# Subtest: PCA basis is orthonormal and reported variance is bounded
+ok 8 - PCA basis is orthonormal and reported variance is bounded
+  ---
+  duration_ms: 1.205873
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 199.382084

@@ -1,0 +1,27 @@
+test_adam_first_step_matches_hand_calculation (test_engine.EngineTests.test_adam_first_step_matches_hand_calculation) ... ok
+test_attention_trace_is_real_normalized_and_causal (test_engine.EngineTests.test_attention_trace_is_real_normalized_and_causal) ... ok
+test_checkpoint_rejects_corruption_and_unknown_versions (test_engine.EngineTests.test_checkpoint_rejects_corruption_and_unknown_versions) ... ok
+test_checkpoint_restores_predictions_and_exact_next_training_step (test_engine.EngineTests.test_checkpoint_restores_predictions_and_exact_next_training_step) ... ok
+test_clipping_and_bad_gradient_updates_are_atomic (test_engine.EngineTests.test_clipping_and_bad_gradient_updates_are_atomic) ... ok
+test_dataset_split_has_no_duplicate_sentences_and_known_characters (test_engine.EngineTests.test_dataset_split_has_no_duplicate_sentences_and_known_characters) ... ok
+test_evaluation_and_generation_do_not_change_training_rng (test_engine.EngineTests.test_evaluation_and_generation_do_not_change_training_rng) ... ok
+test_evaluation_weights_partial_final_chunk_by_target_count (test_engine.EngineTests.test_evaluation_weights_partial_final_chunk_by_target_count) ... ok
+test_every_parameter_gradient_against_central_difference (test_engine.EngineTests.test_every_parameter_gradient_against_central_difference) ... ok
+test_future_tokens_cannot_change_prefix_logits (test_engine.EngineTests.test_future_tokens_cannot_change_prefix_logits) ... ok
+test_invalid_inputs_fail_clearly (test_engine.EngineTests.test_invalid_inputs_fail_clearly) ... ok
+test_layer_norm_constant_input_and_shift_invariance (test_engine.EngineTests.test_layer_norm_constant_input_and_shift_invariance) ... ok
+test_logits_and_loss_are_stable_at_large_magnitudes (test_engine.EngineTests.test_logits_and_loss_are_stable_at_large_magnitudes) ... ok
+test_seed_reproducibility_and_batch_independence (test_engine.EngineTests.test_seed_reproducibility_and_batch_independence) ... ok
+test_single_token_and_full_context_backward_are_finite_and_read_only (test_engine.EngineTests.test_single_token_and_full_context_backward_are_finite_and_read_only) ... ok
+test_temperature_changes_distribution_without_changing_weights (test_engine.EngineTests.test_temperature_changes_distribution_without_changing_weights) ... ok
+test_tiny_dataset_can_be_overfit (test_engine.EngineTests.test_tiny_dataset_can_be_overfit) ... ok
+test_tokenizer_unicode_round_trip_and_unknown_rejection (test_engine.EngineTests.test_tokenizer_unicode_round_trip_and_unknown_rejection) ... ok
+test_two_layer_gradients_across_residual_paths (test_engine.EngineTests.test_two_layer_gradients_across_residual_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.346s
+
+OK
+
+Central differences: 223 parameters; max absolute error=9.175e-08
+Overfit check: loss 0.695950 -> 0.001205

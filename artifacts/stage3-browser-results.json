@@ -1,0 +1,20 @@
+{
+  "browser": "Chromium with software WebGL",
+  "result": "PASS",
+  "checks": [
+    "Real WebGL scene and all six world labels",
+    "Correct active engine and selected final character",
+    "Stage navigation, character selection and causal attention",
+    "Orbit, zoom, focus and reset camera controls",
+    "Animated walkthrough, pause and reduced motion",
+    "Temperature preserves weights and greedy probabilities are exact",
+    "Repeatable seeded generation",
+    "Random reset, one-step and 25-step training, actual weight deltas, loss chart",
+    "Stop between updates, restore checkpoint and Escape closes drawer",
+    "Input validation, uppercase normalization and full 128-character trace",
+    "Accessible diagram and automatic context-loss fallback",
+    "Mobile 3D, inspector and experiment controls without horizontal overflow",
+    "No uncaught browser exceptions, external requests blocked"
+  ],
+  "page_errors": []
+}

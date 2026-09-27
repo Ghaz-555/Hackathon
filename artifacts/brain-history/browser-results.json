@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "checks": [
+    "Real GPT-2 dataset, WebGL points and high-dimensional neighbors",
+    "Actual king - man + woman result and projected arrows",
+    "Editing the expression recomputes results",
+    "Search validation and neighbor navigation",
+    "Depth slice and thickness filter actual projected positions",
+    "Camera controls, labels and reduced motion",
+    "Mobile layout without horizontal overflow",
+    "GPU-loss fallback preserves real-vector search"
+  ],
+  "page_errors": []
+}

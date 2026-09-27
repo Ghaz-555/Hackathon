@@ -1,0 +1,16 @@
+npm notice run glasswork-brain-demo@0.1.0 build
+npm notice run tsc --noEmit && vite build
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 10 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/brain.html                   0.47 kB │ gzip:   0.31 kB
+dist/assets/brain-D-tmpcqX.css    7.04 kB │ gzip:   2.22 kB
+dist/assets/brain-B7NLb8QD.js   567.49 kB │ gzip: 145.07 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.01s
