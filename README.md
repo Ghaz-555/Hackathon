@@ -82,6 +82,5 @@ as historical records; this README describes the current combined application.
 
 ## Attribution
 
-The original team engine remains under its MIT license. The integration, additional
-validation, visualizations and UI were developed with AI coding assistance. GPT-2's
+The original team engine remains under its MIT license.GPT-2's
 source revision and original license accompany its exported embeddings.
