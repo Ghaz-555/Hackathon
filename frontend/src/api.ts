@@ -84,25 +84,54 @@ export const tokenLabel = (s: string) =>
   s === " " ? "␣" : s === "\n" ? "↵" : s;
 
 export type BlockTrace = {
-  attention: number[][][][]; head_outputs: number[][][][];
-  query?: number[][][][]; key?: number[][][][]; value?: number[][][][];
-  query_weights?: number[][]; key_weights?: number[][]; value_weights?: number[][];
-  normalized_attention_input?: number[][][]; attention_projection?: number[][][];
-  attention_residual?: number[][][]; normalized_ff_input?: number[][][];
-  ff_pre_activation?: number[][][]; ff_activation?: number[][][];
-  ff_projection?: number[][][]; output?: number[][][];
+  attention: number[][][][];
+  head_outputs: number[][][][];
+  query?: number[][][][];
+  key?: number[][][][];
+  value?: number[][][][];
+  query_weights?: number[][];
+  key_weights?: number[][];
+  value_weights?: number[][];
+  normalized_attention_input?: number[][][];
+  attention_projection?: number[][][];
+  attention_residual?: number[][][];
+  normalized_ff_input?: number[][][];
+  ff_pre_activation?: number[][][];
+  ff_activation?: number[][][];
+  ff_projection?: number[][][];
+  output?: number[][][];
   qkv_bias?: number[];
 };
 // Keep the API trace intact; choose one layer/head for the close-up view.
-export function selectTrace(data: Inspection, layer: number, head: number): Inspection {
+export function selectTrace(
+  data: Inspection,
+  layer: number,
+  head: number,
+): Inspection {
   if (data.training_scope !== "all_parameters") return data;
   const block = data.trace.blocks[layer] ?? data.trace.blocks[0];
   const d = data.config.d_model / data.config.n_heads;
-  const slice = (m: number[][]) => m.map(r => r.slice(head*d, (head+1)*d));
-  return { ...data, trace: { ...data.trace,
-    queries: block.query![0][head], keys: block.key![0][head], values: block.value![0][head],
-    query_weights: slice(block.query_weights!), key_weights: slice(block.key_weights!), value_weights: slice(block.value_weights!),
-    blocks: [{ attention: [[block.attention[0][head]]], head_outputs: [[block.head_outputs[0][head]]] }],
-    selected_block: block, layer_index: layer, head_index: head,
-  }};
+  const slice = (m: number[][]) =>
+    m.map((r) => r.slice(head * d, (head + 1) * d));
+  return {
+    ...data,
+    trace: {
+      ...data.trace,
+      queries: block.query![0][head],
+      keys: block.key![0][head],
+      values: block.value![0][head],
+      query_weights: slice(block.query_weights!),
+      key_weights: slice(block.key_weights!),
+      value_weights: slice(block.value_weights!),
+      blocks: [
+        {
+          attention: [[block.attention[0][head]]],
+          head_outputs: [[block.head_outputs[0][head]]],
+        },
+      ],
+      selected_block: block,
+      layer_index: layer,
+      head_index: head,
+    },
+  };
 }

@@ -25,15 +25,33 @@ function session(engine: "team" | "transformer") {
 }
 function savedSettings(): { prompt: string; temperature: number } {
   try {
-    const value = JSON.parse(sessionStorage.getItem("glasswork-settings") || "{}");
+    const value = JSON.parse(
+      sessionStorage.getItem("glasswork-settings") || "{}",
+    );
     return {
-      prompt: typeof value.prompt === "string" && value.prompt.length > 0 && value.prompt.length <= 128 ? value.prompt : "the cat",
-      temperature: Number.isFinite(value.temperature) && value.temperature >= 0 && value.temperature <= 2 ? value.temperature : 1,
+      prompt:
+        typeof value.prompt === "string" &&
+        value.prompt.length > 0 &&
+        value.prompt.length <= 128
+          ? value.prompt
+          : "the cat",
+      temperature:
+        Number.isFinite(value.temperature) &&
+        value.temperature >= 0 &&
+        value.temperature <= 2
+          ? value.temperature
+          : 1,
     };
-  } catch { return { prompt: "the cat", temperature: 1 }; }
+  } catch {
+    return { prompt: "the cat", temperature: 1 };
+  }
 }
 export function useLab() {
-  const [engine, setEngine] = useState<"team" | "transformer">(() => sessionStorage.getItem("glasswork-engine") === "team" ? "team" : "transformer");
+  const [engine, setEngine] = useState<"team" | "transformer">(() =>
+    sessionStorage.getItem("glasswork-engine") === "team"
+      ? "team"
+      : "transformer",
+  );
   const [sid, setSid] = useState(""),
     [data, setData] = useState<Inspection | null>(null),
     [error, setError] = useState("");
@@ -47,7 +65,10 @@ export function useLab() {
     [changed, setChanged] = useState<number[][] | null>(null);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
-    sessionStorage.setItem("glasswork-settings", JSON.stringify({ prompt, temperature }));
+    sessionStorage.setItem(
+      "glasswork-settings",
+      JSON.stringify({ prompt, temperature }),
+    );
   }, [prompt, temperature]);
   const operation = useRef(false);
   const sequence = useRef(0),
@@ -60,7 +81,10 @@ export function useLab() {
     let alive = true;
     session(engine)
       .then((s) => {
-        if (alive) { sessionStorage.setItem("glasswork-session", s); setSid(s); }
+        if (alive) {
+          sessionStorage.setItem("glasswork-session", s);
+          setSid(s);
+        }
       })
       .catch((e) => {
         if (alive) {
@@ -199,13 +223,20 @@ export function useLab() {
     if (operation.current || value === engine) return;
     sequence.current++;
     boot = null;
-    setSid(""); setData(null); setError(""); setPending(true);
-    setPrompt("the cat"); setSample(""); setChanged(null); setCompleted(0);
+    setSid("");
+    setData(null);
+    setError("");
+    setPending(true);
+    setPrompt("the cat");
+    setSample("");
+    setChanged(null);
+    setCompleted(0);
     sessionStorage.setItem("glasswork-engine", value);
     setEngine(value);
   }
   return {
-    engine, switchEngine,
+    engine,
+    switchEngine,
     data,
     error,
     setError,

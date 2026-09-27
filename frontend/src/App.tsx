@@ -60,16 +60,24 @@ function Values({ values, label }: { values: number[]; label: string }) {
 }
 export default function App() {
   const lab = useLab();
-  const [layer, setLayer] = useState(0), [head, setHead] = useState(0);
-  const data = useMemo(() => lab.data ? selectTrace(lab.data, layer, head) : null, [lab.data, layer, head]);
+  const [layer, setLayer] = useState(0),
+    [head, setHead] = useState(0);
+  const data = useMemo(
+    () => (lab.data ? selectTrace(lab.data, layer, head) : null),
+    [lab.data, layer, head],
+  );
   const expanded = data?.training_scope === "all_parameters";
   const stages = lessonStages(!!expanded);
-  useEffect(() => { setDraft(lab.prompt); }, [lab.prompt]);
+  useEffect(() => {
+    setDraft(lab.prompt);
+  }, [lab.prompt]);
   const [stage, setStage] = useState(0),
     [token, setToken] = useState(0),
     [playing, setPlaying] = useState(false),
-    [focus, setFocus] = useState(false),
+    [focus, setFocus] = useState(true),
     [cameraReset, setCameraReset] = useState(0);
+  const [progress, setProgress] = useState<number | null>(null),
+    [dimension, setDimension] = useState(0);
   const [draft, setDraft] = useState(lab.prompt),
     [drawer, setDrawer] = useState<"sample" | "train" | null>(null),
     [seed, setSeed] = useState(7),
@@ -100,7 +108,7 @@ export default function App() {
           }
           return i + 1;
         }),
-      4500,
+      6400,
     );
     return () => clearInterval(timer);
   }, [playing]);
@@ -116,9 +124,15 @@ export default function App() {
   }, []);
   const select = (i: number) => {
     setStage(i);
+    setProgress(null);
     setPlaying(false);
     setHover("Hover over a tile to inspect its value");
   };
+  const dimensionCount = data
+    ? data.config.d_model /
+      (stage === 2 || stage === 3 ? data.config.n_heads : 1)
+    : 4;
+  const dimensionStart = Math.min(dimension, Math.max(0, dimensionCount - 8));
   const selected = stages[stage],
     row = Math.min(token, (data?.trace.tokens.length ?? 1) - 1);
   function inspect(e: React.FormEvent) {
@@ -154,8 +168,18 @@ export default function App() {
         <span className="header-divider" />
         <span className="header-caption">THE MODEL, OPENED UP</span>
         <div className="header-right">
-          <select className="model-selector" aria-label="Active model" value={lab.engine} disabled={lab.busy || lab.pending} onChange={e => { setPlaying(false); lab.switchEngine(e.target.value as "team" | "transformer"); }}>
-            <option value="transformer">Transformer · 28k</option><option value="team">Original · 640</option>
+          <select
+            className="model-selector"
+            aria-label="Active model"
+            value={lab.engine}
+            disabled={lab.busy || lab.pending}
+            onChange={(e) => {
+              setPlaying(false);
+              lab.switchEngine(e.target.value as "team" | "transformer");
+            }}
+          >
+            <option value="transformer">Transformer · 28k</option>
+            <option value="team">Original · 640</option>
           </select>
           <a className="subtle-button" href="/brain.html">
             Embedding space ↗
@@ -184,6 +208,26 @@ export default function App() {
               Follow a character. Open a layer. Watch the numbers become a
               possibility.
             </p>
+          </div>
+          <div className="scene-mode" aria-label="Scene mode">
+            <button
+              aria-pressed={!focus && !playing}
+              onClick={() => {
+                setFocus(false);
+                setPlaying(false);
+              }}
+            >
+              Architecture
+            </button>
+            <button
+              aria-pressed={focus || playing}
+              onClick={() => {
+                setFocus(true);
+                setProgress(null);
+              }}
+            >
+              Follow character
+            </button>
           </div>
           <form className="floating-prompt" onSubmit={inspect}>
             <label htmlFor="model-prompt">YOUR INPUT</label>
@@ -258,6 +302,8 @@ export default function App() {
                     stage={stage}
                     token={row}
                     playing={playing}
+                    progress={progress}
+                    dimension={dimensionStart}
                     reduced={reduced}
                     onStage={select}
                     onValue={setHover}
@@ -270,6 +316,55 @@ export default function App() {
               </CanvasBoundary>
             )}
           </div>
+          {(focus || playing) && !diagram && (
+            <div className="journey-controls">
+              <button
+                onClick={() => {
+                  setProgress(null);
+                  setCameraReset((v) => v + 1);
+                }}
+              >
+                Replay operation
+              </button>
+              <label>
+                Scrub{" "}
+                <input
+                  aria-label="Operation progress"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={progress ?? 0}
+                  onChange={(e) => {
+                    setPlaying(false);
+                    setProgress(+e.target.value);
+                  }}
+                />
+              </label>
+              {expanded && (
+                <label>
+                  Dimensions{" "}
+                  <select
+                    aria-label="Dimension window"
+                    value={dimensionStart}
+                    onChange={(e) => setDimension(+e.target.value)}
+                  >
+                    {[0, 8, 16, 24]
+                      .filter((v) => v < dimensionCount)
+                      .map((v) => (
+                        <option key={v} value={v}>
+                          {v}–{v + 7}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+              <span>
+                {progress === null
+                  ? "Animated explanation · 6.4s cycle"
+                  : `${progress}% · paused for inspection`}
+              </span>
+            </div>
+          )}
           <div className="world-toolbar">
             <span>
               <i /> {lab.pending ? "Computing…" : "Live computation"} <b> / </b>{" "}
@@ -334,6 +429,9 @@ export default function App() {
                 disabled={!data}
                 onClick={() => {
                   if (stage === 5) setStage(0);
+                  setFocus(true);
+                  setProgress(null);
+                  setCameraReset((v) => v + 1);
                   setPlaying((v) => !v);
                 }}
                 aria-label={playing ? "Pause walkthrough" : "Play walkthrough"}
@@ -402,10 +500,38 @@ export default function App() {
               ))}
             </select>
           </div>
-          {expanded && (stage === 2 || stage === 3) && <div className="block-picker">
-            <label>Layer <select aria-label="Transformer layer" value={layer} onChange={e => setLayer(+e.target.value)}>{[0,1].map(i => <option key={i} value={i}>{i+1} of 2</option>)}</select></label>
-            <label>Head <select aria-label="Attention head" value={head} onChange={e => setHead(+e.target.value)}>{[0,1].map(i => <option key={i} value={i}>{i+1} of 2</option>)}</select></label>
-          </div>}
+          {expanded && (stage === 2 || stage === 3) && (
+            <div className="block-picker">
+              <label>
+                Layer{" "}
+                <select
+                  aria-label="Transformer layer"
+                  value={layer}
+                  onChange={(e) => setLayer(+e.target.value)}
+                >
+                  {[0, 1].map((i) => (
+                    <option key={i} value={i}>
+                      {i + 1} of 2
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Head{" "}
+                <select
+                  aria-label="Attention head"
+                  value={head}
+                  onChange={(e) => setHead(+e.target.value)}
+                >
+                  {[0, 1].map((i) => (
+                    <option key={i} value={i}>
+                      {i + 1} of 2
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
           <div className="equation">
             <span>THE OPERATION</span>
             <code>
@@ -470,11 +596,42 @@ export default function App() {
                         </div>
                       ))}
                   </div>
-                  <Values label="Weighted values · A × V (selected head)" values={data.trace.blocks[0].head_outputs[0][0][row]} />
-                  {expanded && <details className="block-details"><summary>Inside this transformer block</summary>
-                    {(["attention_projection", "attention_residual", "normalized_ff_input", "ff_pre_activation", "ff_activation", "ff_projection", "output"] as const).map((field, i) => <Values key={field} label={["Joined heads → projection", "First residual addition", "Normalize for feed-forward", "Expand to 128 values", "GELU activation", "Project back to 32", "Second residual → next layer"][i]} values={data.trace.selected_block![field]![0][row]} />)}
-                  </details>}
-
+                  <Values
+                    label="Weighted values · A × V (selected head)"
+                    values={data.trace.blocks[0].head_outputs[0][0][row]}
+                  />
+                  {expanded && (
+                    <details className="block-details">
+                      <summary>Inside this transformer block</summary>
+                      {(
+                        [
+                          "attention_projection",
+                          "attention_residual",
+                          "normalized_ff_input",
+                          "ff_pre_activation",
+                          "ff_activation",
+                          "ff_projection",
+                          "output",
+                        ] as const
+                      ).map((field, i) => (
+                        <Values
+                          key={field}
+                          label={
+                            [
+                              "Joined heads → projection",
+                              "First residual addition",
+                              "Normalize for feed-forward",
+                              "Expand to 128 values",
+                              "GELU activation",
+                              "Project back to 32",
+                              "Second residual → next layer",
+                            ][i]
+                          }
+                          values={data.trace.selected_block![field]![0][row]}
+                        />
+                      ))}
+                    </details>
+                  )}
                 </>
               )}
               {stage === 4 && (
@@ -485,9 +642,18 @@ export default function App() {
                   </p>
                   <Values
                     label="Final hidden representation"
-                    values={data.trace.final_hidden ?? data.trace.blocks[0].head_outputs[0][0].at(-1)!}
+                    values={
+                      data.trace.final_hidden ??
+                      data.trace.blocks[0].head_outputs[0][0].at(-1)!
+                    }
                   />
-                  <div className="weight-matrix" aria-label="Output weights" style={{ gridTemplateColumns: `repeat(${data.characters.length}, 1fr)` }}>
+                  <div
+                    className="weight-matrix"
+                    aria-label="Output weights"
+                    style={{
+                      gridTemplateColumns: `repeat(${data.characters.length}, 1fr)`,
+                    }}
+                  >
                     {data.trace.output_weights.flatMap((r, i) =>
                       r.map((v, j) => (
                         <span
@@ -506,7 +672,8 @@ export default function App() {
                     )}
                   </div>
                   <p className="data-caption">
-                    {data.config.d_model} × {data.characters.length} output weights · {data.trainable_parameter_count} total trainable{" "}
+                    {data.config.d_model} × {data.characters.length} output
+                    weights · {data.trainable_parameter_count} total trainable{" "}
                     {lab.changed
                       ? "· amber = changed since training started"
                       : ""}
@@ -547,6 +714,12 @@ export default function App() {
                 </>
               )}
             </div>
+          )}
+          {stage === 0 && (
+            <a className="embedding-bridge" href="/brain.html">
+              Explore real GPT-2 embeddings →
+              <small>A separate pretrained model · 768 dimensions</small>
+            </a>
           )}
           <details className="reading-key">
             <summary>How to read this view</summary>
@@ -611,7 +784,14 @@ export default function App() {
               <X size={19} />
             </button>
           </div>
-          {lab.error && <p className="lab-message" role="status">{lab.error} <button disabled={lab.busy} onClick={lab.recover}>Retry connection</button></p>}
+          {lab.error && (
+            <p className="lab-message" role="status">
+              {lab.error}{" "}
+              <button disabled={lab.busy} onClick={lab.recover}>
+                Retry connection
+              </button>
+            </p>
+          )}
           {drawer === "sample" ? (
             <div className="sampling-controls">
               <div>
@@ -637,13 +817,27 @@ export default function App() {
                   <span>0 · greedy</span>
                   <span>2 · more varied</span>
                 </div>
-                <div className="lab-probabilities" aria-label="Live sampling probabilities" aria-busy={lab.pending}>
-                  {probabilities.map(({ p, c }) => <div key={c} title={`${tokenLabel(c)}: ${(p * 100).toFixed(2)}%`}>
-                    <span style={{ height: `${p * 90 + 2}px` }} />
-                    <b>{tokenLabel(c)}</b><small>{(p * 100).toFixed(1)}%</small>
-                  </div>)}
+                <div
+                  className="lab-probabilities"
+                  aria-label="Live sampling probabilities"
+                  aria-busy={lab.pending}
+                >
+                  {probabilities.map(({ p, c }) => (
+                    <div
+                      key={c}
+                      title={`${tokenLabel(c)}: ${(p * 100).toFixed(2)}%`}
+                    >
+                      <span style={{ height: `${p * 90 + 2}px` }} />
+                      <b>{tokenLabel(c)}</b>
+                      <small>{(p * 100).toFixed(1)}%</small>
+                    </div>
+                  ))}
                 </div>
-                <p className="lab-caption">{lab.pending ? "Updating distribution…" : `Entropy ${data?.entropy.toFixed(3)} nats · weights unchanged`}</p>
+                <p className="lab-caption">
+                  {lab.pending
+                    ? "Updating distribution…"
+                    : `Entropy ${data?.entropy.toFixed(3)} nats · weights unchanged`}
+                </p>
               </div>
               <div className="sample-box">
                 <div>
@@ -658,7 +852,10 @@ export default function App() {
                       disabled={lab.busy}
                       onChange={(e) =>
                         setSeed(
-                          Math.min(4294967295, Math.max(0, Math.floor(+e.target.value))),
+                          Math.min(
+                            4294967295,
+                            Math.max(0, Math.floor(+e.target.value)),
+                          ),
                         )
                       }
                     />
@@ -677,20 +874,45 @@ export default function App() {
                     "Your continuation will appear here. Same model + settings + seed gives the same text."}
                 </pre>
                 <small>
-                  {data?.characters.length}-character vocabulary · {expanded ? "trained on short original sentences; readable fragments are possible, but this is not a general chatbot." : "a tiny training corpus; imperfect text is expected."}
+                  {data?.characters.length}-character vocabulary ·{" "}
+                  {expanded
+                    ? "trained on short original sentences; readable fragments are possible, but this is not a general chatbot."
+                    : "a tiny training corpus; imperfect text is expected."}
                 </small>
               </div>
             </div>
           ) : (
             <div className="learning-controls">
               <div>
-                <p className="overline">{expanded ? "EVERY PARAMETER LEARNS · NUMPY BACKPROP" : "ONLY THE OUTPUT PROJECTION LEARNS"}</p>
+                <p className="overline">
+                  {expanded
+                    ? "EVERY PARAMETER LEARNS · NUMPY BACKPROP"
+                    : "ONLY THE OUTPUT PROJECTION LEARNS"}
+                </p>
                 <h3>Watch the amber weights change.</h3>
                 <p>
-                  {expanded ? "Each step uses eight 32-character examples. Adam updates embeddings, both attention blocks, feed-forward networks and output weights." : "One step updates 40 output weights with SGD. The attention and embedding stages stay fixed."}
+                  {expanded
+                    ? "Each step uses eight 32-character examples. Adam updates embeddings, both attention blocks, feed-forward networks and output weights."
+                    : "One step updates 40 output weights with SGD. The attention and embedding stages stay fixed."}
                 </p>
-                <p className="lab-lesson">{data?.mode === "trained" ? "You are viewing a trained checkpoint. Choose Random weights to see learning from the beginning, then train and compare the curves." : "You are learning from a fresh start. Each update uses the training sentence below; your input only changes the prediction being inspected."}</p>
-                <p className="lab-corpus">Practice: <code>{data?.training_text.slice(0, 110)}{expanded ? "…" : ""}</code><br />Held out: <code>{data?.validation_text.slice(0, 80)}{expanded ? "…" : ""}</code></p>
+                <p className="lab-lesson">
+                  {data?.mode === "trained"
+                    ? "You are viewing a trained checkpoint. Choose Random weights to see learning from the beginning, then train and compare the curves."
+                    : "You are learning from a fresh start. Each update uses the training sentence below; your input only changes the prediction being inspected."}
+                </p>
+                <p className="lab-corpus">
+                  Practice:{" "}
+                  <code>
+                    {data?.training_text.slice(0, 110)}
+                    {expanded ? "…" : ""}
+                  </code>
+                  <br />
+                  Held out:{" "}
+                  <code>
+                    {data?.validation_text.slice(0, 80)}
+                    {expanded ? "…" : ""}
+                  </code>
+                </p>
                 <div className="learning-actions">
                   <button
                     disabled={!lab.ready}

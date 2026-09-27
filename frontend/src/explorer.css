@@ -1248,28 +1248,282 @@ body {
 }
 
 /* Reserve room for the prompt so projected labels never sit under it. */
-.scene-container { padding-top: 205px; }
-.diagram-view { padding-top: 35px; }
-@media(max-width:780px) { .scene-container { height: 720px; } .diagram-view { padding-top: 35px; } }
+.scene-container {
+  padding-top: 205px;
+}
+.diagram-view {
+  padding-top: 35px;
+}
+@media (max-width: 780px) {
+  .scene-container {
+    height: 720px;
+  }
+  .diagram-view {
+    padding-top: 35px;
+  }
+}
 
 /* Keep the experiment's result beside the control that changes it. */
-.lab-probabilities { display:flex; align-items:flex-end; gap:5px; height:130px; margin-top:12px; }
-.lab-probabilities > div { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
-.lab-probabilities span { width:75%; background:linear-gradient(#78ae6a,#456c49); border-radius:3px 3px 0 0; transition:height .3s; }
-.lab-probabilities b { font:12px monospace; }
-.lab-probabilities small { font-size:8px; }
-.lab-caption,.lab-corpus { font-size:10px; line-height:1.7; }
-.lab-message { padding:12px; background:#f9ddbe; border-radius:6px; font-size:12px; }
-.lab-message button { margin-left:8px; }
-@media(prefers-reduced-motion:reduce) { .lab-probabilities span { transition:none; } }
+.lab-probabilities {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 130px;
+  margin-top: 12px;
+}
+.lab-probabilities > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.lab-probabilities span {
+  width: 75%;
+  background: linear-gradient(#78ae6a, #456c49);
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s;
+}
+.lab-probabilities b {
+  font: 12px monospace;
+}
+.lab-probabilities small {
+  font-size: 8px;
+}
+.lab-caption,
+.lab-corpus {
+  font-size: 10px;
+  line-height: 1.7;
+}
+.lab-message {
+  padding: 12px;
+  background: #f9ddbe;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.lab-message button {
+  margin-left: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-probabilities span {
+    transition: none;
+  }
+}
 
-.model-selector,.block-picker select { background:#12232b; color:#bfe3d4; border:1px solid #36514e; padding:7px; border-radius:6px; font:11px inherit; max-width:150px; }
-.block-picker { display:flex; gap:12px; margin:12px 0; font-size:11px; }
-.block-picker label { display:flex; flex-direction:column; gap:6px; }
-.block-details { margin-top:18px; font-size:12px; }
-.block-details .vector > div { flex-wrap:wrap; }
-.stage-values .vector > div { flex-wrap:wrap; }
-.lab-corpus { max-height:85px; overflow:auto; }
-.lab-probabilities { overflow-x:auto; }
-.lab-probabilities > div { min-width:15px; }
-.weight-matrix { max-height:160px; overflow:auto; }
+.model-selector,
+.block-picker select {
+  background: #12232b;
+  color: #bfe3d4;
+  border: 1px solid #36514e;
+  padding: 7px;
+  border-radius: 6px;
+  font: 11px inherit;
+  max-width: 150px;
+}
+.block-picker {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 11px;
+}
+.block-picker label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.block-details {
+  margin-top: 18px;
+  font-size: 12px;
+}
+.block-details .vector > div {
+  flex-wrap: wrap;
+}
+.stage-values .vector > div {
+  flex-wrap: wrap;
+}
+.lab-corpus {
+  max-height: 85px;
+  overflow: auto;
+}
+.lab-probabilities {
+  overflow-x: auto;
+}
+.lab-probabilities > div {
+  min-width: 15px;
+}
+.weight-matrix {
+  max-height: 160px;
+  overflow: auto;
+}
+
+.scene-mode {
+  position: absolute;
+  top: 145px;
+  right: 24px;
+  z-index: 23;
+  display: flex;
+  gap: 5px;
+}
+.scene-mode button,
+.journey-controls button,
+.journey-controls select {
+  background: #152a32;
+  border: 1px solid #36554f;
+  color: #a1bfb4;
+  border-radius: 6px;
+  padding: 8px 11px;
+  font-size: 11px;
+}
+.scene-mode button[aria-pressed="true"] {
+  color: #d8ffee;
+  border-color: #81cdae;
+  background: #22473d;
+}
+.journey-title {
+  width: 600px;
+  text-align: center;
+}
+.journey-title span {
+  color: #79bda8;
+  font: 10px monospace;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 10px;
+}
+.journey-title strong {
+  color: #ddf3ed;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.7px;
+}
+.journey-character {
+  font-size: 36px;
+  color: #e2ffed;
+}
+.journey-caption {
+  display: block;
+  white-space: nowrap;
+  color: #96b5bb;
+  font: 11px monospace;
+  padding: 5px 8px;
+  background: #10202bea;
+  border-radius: 4px;
+}
+.journey-number {
+  white-space: nowrap;
+  font: 10px monospace;
+  color: #effffb;
+  text-shadow: 0 1px 4px #000;
+}
+.journey-operator {
+  white-space: nowrap;
+  display: block;
+  padding: 10px;
+  border: 1px solid #547b74;
+  background: #122730ed;
+  border-radius: 7px;
+  color: #d8f9e8;
+  font: 15px monospace;
+}
+.journey-phases {
+  position: relative;
+  display: flex;
+  width: 650px;
+  padding: 13px 0;
+  border-top: 1px solid #31554e;
+  color: #56766f;
+  gap: 20px;
+}
+.journey-phases span {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.journey-phases b {
+  display: block;
+  font: 10px monospace;
+  margin-bottom: 5px;
+}
+.journey-phases[data-phase="0"] span:nth-child(1),
+.journey-phases[data-phase="1"] span:nth-child(2),
+.journey-phases[data-phase="2"] span:nth-child(3) {
+  color: #b9f4d8;
+}
+.journey-phases i {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: var(--journey-progress, 0%);
+  height: 2px;
+  background: #86efc2;
+  box-shadow: 0 0 9px #86efc2;
+}
+.journey-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 12px 25px;
+  border-top: 1px solid #29413d;
+  color: #8dab9f;
+  flex-wrap: wrap;
+  font-size: 10px;
+}
+.journey-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.journey-controls input {
+  width: 100px;
+  accent-color: #86efc2;
+}
+.embedding-bridge {
+  display: block;
+  color: #4a7759;
+  font-size: 12px;
+  margin: 20px 0;
+}
+.embedding-bridge small {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+}
+@media (max-width: 780px) {
+  .scene-mode {
+    top: 160px;
+    right: 16px;
+  }
+  .journey-title {
+    width: 300px;
+  }
+  .journey-title strong {
+    font-size: 16px;
+  }
+  .journey-title span {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+  .journey-phases {
+    width: 300px;
+    gap: 8px;
+  }
+  .journey-phases span {
+    font-size: 8px;
+  }
+  .journey-caption {
+    font-size: 7px;
+    padding: 3px;
+  }
+  .journey-operator {
+    font-size: 9px;
+    padding: 5px;
+  }
+  .journey-number {
+    font-size: 7px;
+  }
+  .journey-controls {
+    padding: 10px;
+    gap: 8px;
+  }
+}

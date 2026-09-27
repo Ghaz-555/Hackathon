@@ -19,6 +19,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import type { Inspection } from "./api";
 import { tokenLabel } from "./api";
+import OperationJourney from "./OperationJourney";
 import { lessonStages } from "./stages";
 
 type Point = [number, number, number];
@@ -27,6 +28,8 @@ type Props = {
   stage: number;
   token: number;
   playing: boolean;
+  progress: number | null;
+  dimension: number;
   reduced: boolean;
   onStage: (i: number) => void;
   onValue: (s: string) => void;
@@ -287,7 +290,13 @@ function Conduit({
       <group ref={dots} visible={motion}>
         {Array.from({ length: 4 }, (_, i) => (
           <mesh key={i} position={curve.getPoint(i / 4)}>
-            <sphereGeometry args={[active === stage || active + 1 === stage ? 0.065 : 0.04, 8, 8]} />
+            <sphereGeometry
+              args={[
+                active === stage || active + 1 === stage ? 0.065 : 0.04,
+                8,
+                8,
+              ]}
+            />
             <meshBasicMaterial
               color={color}
               transparent
@@ -334,7 +343,11 @@ function OutputBars({
         {data.probabilities.map((p, i) => (
           <mesh
             key={i}
-            position={[(i - (data.characters.length - 1) / 2) * pitch, p * 1.25, 0]}
+            position={[
+              (i - (data.characters.length - 1) / 2) * pitch,
+              p * 1.25,
+              0,
+            ]}
             scale={[1, Math.max(p * 2.5, 0.00001), 1]}
             visible={p > 0}
             onPointerMove={(e) => {
@@ -400,17 +413,19 @@ function CameraRig({
   const follow = props.focus || props.playing;
   useEffect(() => {
     const center = follow
-      ? new THREE.Vector3(...centers[props.stage])
+      ? new THREE.Vector3(0, 0, 0)
       : new THREE.Vector3(0, -0.8, 0);
     destination.current = {
       eye: center
         .clone()
         .add(
-          follow ? new THREE.Vector3(5, 3, 14) : new THREE.Vector3(8, 6, 21),
+          follow
+            ? new THREE.Vector3(1.5, 1.2, 16)
+            : new THREE.Vector3(8, 6, 21),
         ),
       target: center,
       zoom: follow
-        ? Math.min(size.width / 6, size.height / 4.8)
+        ? Math.min(size.width / 12, size.height / 7.2)
         : Math.min(size.width / 18, size.height / 11),
       moving: true,
     };
@@ -550,207 +565,261 @@ function World(props: Props) {
         <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color="#0b141b" metalness={0.2} roughness={0.8} />
       </mesh>
-      {connections.map((edge, i) => (
-        <Conduit key={i} {...edge} active={stage} motion={motion} />
-      ))}
-      {stages.map((item, i) => (
-        <group
-          key={i}
-          position={centers[i]}
-          onClick={(e) => {
-            e.stopPropagation();
-            onStage(i);
-          }}
-          onPointerOver={() => {
-            document.body.style.cursor = "pointer";
-          }}
-          onPointerOut={() => {
-            document.body.style.cursor = "auto";
-          }}
-        >
-          {/* A glass backplate groups actual operations; it is not a fictitious model layer. */}
-          <RoundedBox
-            args={[
-              i === 2 ? 3.7 : i === 3 ? 3.2 : 3,
-              i === 3 ? 4.7 : 3.4,
-              0.06,
-            ]}
-            radius={0.12}
-            smoothness={3}
-            position={[0, i === 3 ? -0.6 : 0, -1.8]}
-          >
-            <meshPhysicalMaterial
-              color={item.color}
-              transparent
-              opacity={i === stage ? 0.065 : 0.025}
-              roughness={0.25}
-              depthWrite={false}
-            />
-            <Edges
-              color={item.color}
-              transparent
-              opacity={i === stage ? 0.38 : 0.1}
-            />
-          </RoundedBox>
-          <Html position={[0, i === 3 ? 2 : i === 5 ? 3.1 : 2.15, 0]} center>
-            <button
-              className={"world-label " + (i === stage ? "active" : "")}
-              onClick={() => onStage(i)}
+      {props.focus || props.playing ? (
+        <OperationJourney
+          key={`${stage}-${token}-${props.reset}-${props.dimension}-${data.trace.layer_index}-${data.trace.head_index}`}
+          data={data}
+          stage={stage}
+          token={token}
+          reduced={props.reduced}
+          progress={props.progress}
+          dimension={props.dimension}
+          Label={Html}
+        />
+      ) : (
+        <>
+          {connections.map((edge, i) => (
+            <Conduit key={i} {...edge} active={stage} motion={motion} />
+          ))}
+          {stages.map((item, i) => (
+            <group
+              key={i}
+              position={centers[i]}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStage(i);
+              }}
+              onPointerOver={() => {
+                document.body.style.cursor = "pointer";
+              }}
+              onPointerOut={() => {
+                document.body.style.cursor = "auto";
+              }}
             >
-              <span>0{i + 1}</span>
-              {item.name}
-            </button>
-          </Html>
-          {i === 0 && (
-            <>
-              {tensor(
-                rows(data.trace.token_embeddings),
-                item.color,
-                "TOKEN EMBEDDINGS",
-                i,
-                { selected: token - start, offset: start, size: 2.2 },
-              )}
-              <Html
-                position={[0, 1.5, 0]}
-                center
-                style={{ pointerEvents: "none" }}
+              {/* A glass backplate groups actual operations; it is not a fictitious model layer. */}
+              <RoundedBox
+                args={[
+                  i === 2 ? 3.7 : i === 3 ? 3.2 : 3,
+                  i === 3 ? 4.7 : 3.4,
+                  0.06,
+                ]}
+                radius={0.12}
+                smoothness={3}
+                position={[0, i === 3 ? -0.6 : 0, -1.8]}
               >
-                <span className="input-token-strip">
-                  {data.trace.tokens.slice(start, end).map((c, j) => (
-                    <b
-                      className={j === token - start ? "selected" : ""}
-                      key={j}
-                    >
-                      {tokenLabel(c)}
-                    </b>
-                  ))}
-                </span>
+                <meshPhysicalMaterial
+                  color={item.color}
+                  transparent
+                  opacity={i === stage ? 0.065 : 0.025}
+                  roughness={0.25}
+                  depthWrite={false}
+                />
+                <Edges
+                  color={item.color}
+                  transparent
+                  opacity={i === stage ? 0.38 : 0.1}
+                />
+              </RoundedBox>
+              <Html
+                position={[0, i === 3 ? 2 : i === 5 ? 3.1 : 2.15, 0]}
+                center
+              >
+                <button
+                  className={"world-label " + (i === stage ? "active" : "")}
+                  onClick={() => onStage(i)}
+                >
+                  <span>0{i + 1}</span>
+                  {item.name}
+                </button>
               </Html>
-            </>
-          )}
-          {i === 1 && (
-            <>
-              <group position={[0, 0, -0.55]}>
-                {tensor(
-                  rows(data.trace.position_embeddings),
-                  "#568a9d",
-                  "POSITIONS P",
-                  i,
-                  { selected: token - start, offset: start, size: 1.95 },
+              {i === 0 && (
+                <>
+                  {tensor(
+                    rows(data.trace.token_embeddings),
+                    item.color,
+                    "TOKEN EMBEDDINGS",
+                    i,
+                    { selected: token - start, offset: start, size: 2.2 },
+                  )}
+                  <Html
+                    position={[0, 1.5, 0]}
+                    center
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <span className="input-token-strip">
+                      {data.trace.tokens.slice(start, end).map((c, j) => (
+                        <b
+                          className={j === token - start ? "selected" : ""}
+                          key={j}
+                        >
+                          {tokenLabel(c)}
+                        </b>
+                      ))}
+                    </span>
+                  </Html>
+                </>
+              )}
+              {i === 1 && (
+                <>
+                  <group position={[0, 0, -0.55]}>
+                    {tensor(
+                      rows(data.trace.position_embeddings),
+                      "#568a9d",
+                      "POSITIONS P",
+                      i,
+                      { selected: token - start, offset: start, size: 1.95 },
+                    )}
+                  </group>
+                  <group position={[0.45, 0.15, 0.7]}>
+                    {tensor(
+                      rows(data.trace.embedding_sum[0]),
+                      item.color,
+                      "X = E + P",
+                      i,
+                      { selected: token - start, offset: start, size: 1.95 },
+                    )}
+                  </group>
+                </>
+              )}
+              {i === 2 &&
+                [data.trace.queries, data.trace.keys, data.trace.values].map(
+                  (matrix, j) => (
+                    <group key={j} position={[0, 0, (j - 1) * 1.35]}>
+                      <group position={[-0.92, 0, 0]}>
+                        {tensor(
+                          [
+                            data.trace.query_weights,
+                            data.trace.key_weights,
+                            data.trace.value_weights,
+                          ][j],
+                          ["#b9a0ff", "#75cfeb", "#f3bd8d"][j],
+                          ["Wq", "Wk", "Wv"][j],
+                          i,
+                          { size: 0.85 },
+                        )}
+                      </group>
+                      <Line
+                        points={[
+                          [-0.35, 0, 0],
+                          [0.08, 0, 0],
+                        ]}
+                        color={["#b9a0ff", "#75cfeb", "#f3bd8d"][j]}
+                        transparent
+                        opacity={0.6}
+                      />
+                      <group position={[0.85, 0, 0]}>
+                        {tensor(
+                          rows(matrix),
+                          ["#b9a0ff", "#75cfeb", "#f3bd8d"][j],
+                          (expanded
+                            ? [
+                                "Q = LN(X)Wq + bq",
+                                "K = LN(X)Wk + bk",
+                                "V = LN(X)Wv + bv",
+                              ]
+                            : ["Q = XWq", "K = XWk", "V = XWv"])[j],
+                          i,
+                          {
+                            selected: token - start,
+                            offset: start,
+                            size: 1.75,
+                          },
+                        )}
+                      </group>
+                    </group>
+                  ),
                 )}
-              </group>
-              <group position={[0.45, 0.15, 0.7]}>
-                {tensor(
-                  rows(data.trace.embedding_sum[0]),
-                  item.color,
-                  "X = E + P",
-                  i,
-                  { selected: token - start, offset: start, size: 1.95 },
-                )}
-              </group>
-            </>
-          )}
-          {i === 2 &&
-            [data.trace.queries, data.trace.keys, data.trace.values].map(
-              (matrix, j) => (
-                <group key={j} position={[0, 0, (j - 1) * 1.35]}>
-                  <group position={[-0.92, 0, 0]}>
+              {i === 3 && (
+                <>
+                  {tensor(
+                    rows(data.trace.blocks[0].attention[0][0]).map((r) =>
+                      r.slice(start, end),
+                    ),
+                    item.color,
+                    "MASKED ATTENTION A",
+                    i,
+                    {
+                      size: 2.2,
+                      selected: token - start,
+                      offset: start,
+                      causal: true,
+                    },
+                  )}
+                  {expanded && (
+                    <group position={[0, 0, -2.7]}>
+                      {tensor(
+                        rows(data.trace.selected_block!.ff_activation![0]).map(
+                          (r) => r.slice(0, 16),
+                        ),
+                        "#f3bd8d",
+                        `LAYER ${(data.trace.layer_index ?? 0) + 1} · GELU (16 / 128 channels)`,
+                        i,
+                        { size: 2.2, selected: token - start, offset: start },
+                      )}
+                      <Line
+                        points={[
+                          [0, 1.5, 0],
+                          [-1.8, 1.5, 0],
+                          [-1.8, -1.5, 2.7],
+                          [0, -1.5, 2.7],
+                        ]}
+                        color="#f3bd8d"
+                        dashed
+                        dashSize={0.12}
+                        gapSize={0.1}
+                      />
+                    </group>
+                  )}
+                  <group position={[0, -2.25, 0]}>
                     {tensor(
                       [
-                        data.trace.query_weights,
-                        data.trace.key_weights,
-                        data.trace.value_weights,
-                      ][j],
-                      ["#b9a0ff", "#75cfeb", "#f3bd8d"][j],
-                      ["Wq", "Wk", "Wv"][j],
+                        data.trace.final_hidden ??
+                          data.trace.blocks[0].head_outputs[0][0].at(-1)!,
+                      ],
+                      "#9bd5e5",
+                      expanded
+                        ? "FINAL LAYERNORM · BOTH BLOCKS"
+                        : "FINAL h = (A × V)last",
                       i,
-                      { size: 0.85 },
+                      { size: 1.6 },
                     )}
                   </group>
-                  <Line
-                    points={[
-                      [-0.35, 0, 0],
-                      [0.08, 0, 0],
-                    ]}
-                    color={["#b9a0ff", "#75cfeb", "#f3bd8d"][j]}
-                    transparent
-                    opacity={0.6}
-                  />
-                  <group position={[0.85, 0, 0]}>
-                    {tensor(
-                      rows(matrix),
-                      ["#b9a0ff", "#75cfeb", "#f3bd8d"][j],
-                      ["Q = XWq", "K = XWk", "V = XWv"][j],
-                      i,
-                      { selected: token - start, offset: start, size: 1.75 },
-                    )}
-                  </group>
-                </group>
-              ),
-            )}
-          {i === 3 && (
-            <>
-              {tensor(
-                rows(data.trace.blocks[0].attention[0][0]).map((r) =>
-                  r.slice(start, end),
-                ),
-                item.color,
-                "MASKED ATTENTION A",
-                i,
-                {
-                  size: 2.2,
-                  selected: token - start,
-                  offset: start,
-                  causal: true,
-                },
+                </>
               )}
-              {expanded && <group position={[0, 0, -2.7]}>
-                {tensor(rows(data.trace.selected_block!.ff_activation![0]).map(r => r.slice(0, 16)), "#f3bd8d", `LAYER ${(data.trace.layer_index ?? 0)+1} · GELU (16 / 128 channels)`, i, {size:2.2, selected:token-start, offset:start})}
-                <Line points={[[0,1.5,0],[-1.8,1.5,0],[-1.8,-1.5,2.7],[0,-1.5,2.7]]} color="#f3bd8d" dashed dashSize={0.12} gapSize={0.1} />
-              </group>}
-              <group position={[0, -2.25, 0]}>
-                {tensor(
-                  [data.trace.final_hidden ?? data.trace.blocks[0].head_outputs[0][0].at(-1)!],
-                  "#9bd5e5",
-                  expanded ? "FINAL LAYERNORM · BOTH BLOCKS" : "FINAL h = (A × V)last",
-                  i,
-                  { size: 1.6 },
-                )}
-              </group>
-            </>
-          )}
-          {i === 4 && (
-            <>
-              <group position={[0, 0.35, 0]}>
-                {tensor(
-                  data.trace.output_weights,
-                  item.color,
-                  `Wout · ${data.config.d_model} × ${data.characters.length}`,
-                  i,
-                  { size: 2.5, changed: props.changed },
-                )}
-              </group>
-              <group position={[0, -1, 0]}>
-                {tensor(
-                  [data.logits],
-                  "#e9d5a4",
-                  expanded ? "LOGITS = h × Wout + b" : "LOGITS = h × Wout",
-                  i,
-                  { size: 2.5 },
-                )}
-              </group>
-            </>
-          )}
-          {i === 5 && (
-            <OutputBars
-              data={data}
-              active={stage === i}
-              motion={motion}
-              onValue={onValue}
-            />
-          )}
-        </group>
-      ))}
+              {i === 4 && (
+                <>
+                  <group position={[0, 0.35, 0]}>
+                    {tensor(
+                      data.trace.output_weights,
+                      item.color,
+                      `Wout · ${data.config.d_model} × ${data.characters.length}`,
+                      i,
+                      { size: 2.5, changed: props.changed },
+                    )}
+                  </group>
+                  <group position={[0, -1, 0]}>
+                    {tensor(
+                      [data.logits],
+                      "#e9d5a4",
+                      expanded ? "LOGITS = h × Wout + b" : "LOGITS = h × Wout",
+                      i,
+                      { size: 2.5 },
+                    )}
+                  </group>
+                </>
+              )}
+              {i === 5 && (
+                <OutputBars
+                  data={data}
+                  active={stage === i}
+                  motion={motion}
+                  onValue={onValue}
+                />
+              )}
+            </group>
+          ))}
+        </>
+      )}
       <OrbitControls
         ref={controls}
         makeDefault
