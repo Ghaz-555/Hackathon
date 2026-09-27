@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: export shape and checksum
+ok 1 - export shape and checksum
+  ---
+  duration_ms: 7.563645
+  type: 'test'
+  ...
+# Subtest: PCA matches every exported position
+ok 2 - PCA matches every exported position
+  ---
+  duration_ms: 68.791314
+  type: 'test'
+  ...
+# Subtest: affine arithmetic matches projected displacement
+ok 3 - affine arithmetic matches projected displacement
+  ---
+  duration_ms: 0.786546
+  type: 'test'
+  ...
+# Subtest: self cosine is one and exclusions apply
+ok 4 - self cosine is one and exclusions apply
+  ---
+  duration_ms: 18.201079
+  type: 'test'
+  ...
+# Subtest: analogy matches independent NumPy ranking
+ok 5 - analogy matches independent NumPy ranking
+  ---
+  duration_ms: 18.107002
+  type: 'test'
+  ...
+# Subtest: cancellation returns the remaining vector
+ok 6 - cancellation returns the remaining vector
+  ---
+  duration_ms: 1.023641
+  type: 'test'
+  ...
+# Subtest: invalid vectors fail
+ok 7 - invalid vectors fail
+  ---
+  duration_ms: 1.640999
+  type: 'test'
+  ...
+# Subtest: PCA basis is orthonormal
+ok 8 - PCA basis is orthonormal
+  ---
+  duration_ms: 1.197998
+  type: 'test'
+  ...
+# Subtest: weighted sums project from the projected zero, not the plot origin
+ok 9 - weighted sums project from the projected zero, not the plot origin
+  ---
+  duration_ms: 4.991297
+  type: 'test'
+  ...
+# Subtest: weighted sums reject invalid input and cancellation has no cosine direction
+ok 10 - weighted sums reject invalid input and cancellation has no cosine direction
+  ---
+  duration_ms: 1.865081
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 150.960585

@@ -8,18 +8,19 @@ root.innerHTML = `
 <header class="brain-header"><a href="/" class="brand"><span>◈</span> glasswork.</a><a class="header-note" href="/">← Train the small model</a><span class="model-tag">GPT-2 · input embeddings</span></header>
 <main class="brain-layout">
   <section class="universe" aria-label="Embedding explorer">
-    <div class="scene-title"><span class="eyebrow">A SMALL WINDOW INTO 768 DIMENSIONS</span><h1>Words have coordinates.</h1><p>Explore a real embedding space. Follow a word.<br>Move through the relationships it learned.</p></div>
+    <div class="scene-title"><span class="eyebrow">A SMALL WINDOW INTO 768 DIMENSIONS</span><h1>The brain of an LLM.</h1><p>Explore a real embedding space. Follow a word.<br>Move through the relationships it learned.</p></div>
     <div id="space" class="space"><div id="loading" class="loading">Loading real GPT-2 vectors…</div></div>
     <div class="scene-status"><span id="point-count">Preparing the space</span><span>Drag to orbit · scroll to zoom · click a point</span></div>
     <div class="view-controls"><button id="reset-view">Reset view</button><button id="focus-token">Focus token</button><button id="rotate" aria-pressed="false">Rotate</button><button id="labels" aria-pressed="true">Labels</button><button id="motion" aria-pressed="false">Reduce motion</button></div>
+    <div class="arithmetic-playback" hidden><button id="replay-arithmetic">Replay addition</button><label>Scrub<input id="arithmetic-scrub" aria-label="Arithmetic progress" type="range" min="0" max="100" value="0"></label><span id="arithmetic-status" aria-live="off">Scale A → add B → add C</span></div>
     <div class="slice-controls"><div><span class="eyebrow">SLICE THE PROJECTION</span><p id="variance-note">Keep a band of the third principal component in view.</p></div><label for="depth">Depth <output id="depth-value" for="depth">0.0</output><input id="depth" type="range" min="-10" max="10" step=".1" value="0"></label><label for="width">Thickness <output id="width-value" for="width">All</output><input id="width" type="range" min=".5" max="30" step=".5" value="30"></label></div>
   </section>
   <aside class="brain-inspector"><span class="eyebrow">EXPLORE A TOKEN</span><form id="search-form"><label for="token-search" class="sr-only">Find a token</label><input id="token-search" list="token-options" value="king" autocomplete="off" spellcheck="false"><button aria-label="Find token">↗</button></form><datalist id="token-options"></datalist>
     <div class="token-summary"><h2 id="selected-name">king</h2><span id="token-id">Waiting for data</span><p id="token-description">Each point is one learned input vector—not a whole thought or the model’s reasoning.</p></div>
     <div class="neighbor-heading"><h3 id="neighbors-heading">Nearest in 768D</h3><span>COSINE</span></div><ol id="neighbors" class="neighbors"></ol>
-    <section class="arithmetic"><span class="eyebrow">MOVE A RELATIONSHIP</span><h3>What happens if…</h3><form id="analogy-form"><div class="expression"><label>A<input id="a" aria-label="Starting token A" list="token-options" value="king"></label><b>−</b><label>B<input id="b" aria-label="Subtract token B" list="token-options" value="man"></label><b>+</b><label>C<input id="c" aria-label="Add token C" list="token-options" value="woman"></label></div><button class="calculate">Explore A − B + C <span>→</span></button></form><p id="analogy-note">Try king − man + woman. The answer comes from the vectors; it is not scripted.</p></section>
-    <p id="error" role="alert" hidden></p>
-    <details class="method"><summary>What am I actually seeing?</summary><p id="projection-note"></p><p>The scene uses PCA: three directions capturing the most variance in this 2,048-token subset. Closeness in this view can differ from closeness in the original vectors.</p><p>Search and analogy rankings use cosine similarity across all 768 original dimensions, among these 2,048 tokens. Inputs are excluded from analogy results. Arrows show the projected B → C displacement, and the same displacement applied to A.</p><p>All tokens here begin with a space in GPT-2’s tokenizer. Alphabetic tokens can still be word fragments. These are static input embeddings, not contextual representations. Selected tokens and their neighbors stay visible when slicing.</p><a id="data-source" target="_blank" rel="noreferrer">View pinned model source ↗</a></details>
+    <section class="arithmetic"><span class="eyebrow">MOVE A RELATIONSHIP</span><h3>What happens if…</h3><form id="analogy-form"><div class="expression"><label>A<input id="a" aria-label="Starting token A" list="token-options" value="king"></label><b>−</b><label>B<input id="b" aria-label="Subtract token B" list="token-options" value="man"></label><b>+</b><label>C<input id="c" aria-label="Add token C" list="token-options" value="woman"></label></div><div class="coefficient-controls"><label>α · scale A<input id="alpha" aria-label="Scale A" type="number" min="-3" max="3" step=".25" value="1"></label><label>β · scale B<input id="beta" aria-label="Scale B" type="number" min="-3" max="3" step=".25" value="-1"></label><label>γ · scale C<input id="gamma" aria-label="Scale C" type="number" min="-3" max="3" step=".25" value="1"></label></div><button class="calculate">Explore A − B + C <span>→</span></button></form><p id="analogy-note">Try king − man + woman. The answer comes from the vectors; it is not scripted.</p></section>
+    <section class="vector-calculation" hidden><span class="eyebrow">THE SUM, COMPONENT BY COMPONENT</span><div id="component-chart"></div><p>First 8 of 768 dimensions. Each row adds the three scaled components; the result is projected only after addition.</p></section><p id="error" role="alert" hidden></p>
+    <details class="method"><summary>What am I actually seeing?</summary><p id="projection-note"></p><p>The scene uses PCA: three directions capturing the most variance in this 2,048-token subset. Closeness in this view can differ from closeness in the original vectors.</p><p>Search and analogy rankings use cosine similarity across all 768 original dimensions, among these 2,048 tokens. Inputs are excluded from analogy results. Arrows add αA, βB and γC head to tail, starting at the projected zero vector. Because PCA is centered, the zero vector need not lie at the visual origin.</p><p>All tokens here begin with a space in GPT-2’s tokenizer. Alphabetic tokens can still be word fragments. These are static input embeddings, not contextual representations. Selected tokens and their neighbors stay visible when slicing.</p><a id="data-source" target="_blank" rel="noreferrer">View pinned model source ↗</a></details>
   </aside>
 </main><footer><span>REAL WEIGHTS. A PROJECTED VIEW.</span><span id="dataset-status">NumPy preparation · Three.js visualization</span></footer>`;
 
@@ -98,6 +99,8 @@ function select(index: number) {
   showSelection(index);
 
   activeAnalogy = null;
+  document.querySelector<HTMLElement>(".arithmetic-playback")!.hidden = true;
+  document.querySelector<HTMLElement>(".vector-calculation")!.hidden = true;
 
   currentNeighbors = space.nearest(space.vector(index), new Set([index]));
 
@@ -125,7 +128,19 @@ function runAnalogy(event: SubmitEvent) {
       b = tokenIndex("b"),
       c = tokenIndex("c");
 
-    const query = space.analogy(a, b, c);
+    const coefficients = ["alpha", "beta", "gamma"].map((id) =>
+      Number(input(id).value),
+    );
+    if (coefficients.some((v) => !Number.isFinite(v) || Math.abs(v) > 3))
+      throw new Error("Choose finite scales between −3 and 3.");
+    const classic = coefficients.join(",") === "1,-1,1";
+    const expression = classic
+      ? "A − B + C"
+      : `${coefficients[0]}A + (${coefficients[1]})B + (${coefficients[2]})C`;
+    const query = space.combination([a, b, c], coefficients);
+    const zero = new Float64Array(space.manifest.dimensions);
+    const first = space.combination([a], [coefficients[0]]);
+    const second = space.combination([a, b], coefficients.slice(0, 2));
 
     currentNeighbors = space.nearest(query, new Set([a, b, c]));
 
@@ -133,7 +148,7 @@ function runAnalogy(event: SubmitEvent) {
     showNeighbors(currentNeighbors);
     error();
 
-    element("neighbors-heading").textContent = "Nearest to A − B + C";
+    element("neighbors-heading").textContent = "Nearest to " + expression;
 
     activeAnalogy = {
       a,
@@ -141,6 +156,8 @@ function runAnalogy(event: SubmitEvent) {
       c,
       result: space.project(query),
       nearest: currentNeighbors[0].index,
+      steps: [zero, first, second, query].map((v) => space.project(v)),
+      expression,
     };
 
     scene?.select(
@@ -149,17 +166,43 @@ function runAnalogy(event: SubmitEvent) {
       activeAnalogy,
     );
 
+    document.querySelector<HTMLElement>(".arithmetic-playback")!.hidden = false;
+    document.querySelector<HTMLElement>(".vector-calculation")!.hidden = false;
+    input("arithmetic-scrub").value = "0";
+    const chart = element("component-chart");
+    chart.replaceChildren();
+    for (let i = 0; i < 8; i++) {
+      const row = document.createElement("div");
+      const terms = [a, b, c].map(
+        (index, j) => space.vector(index)[i] * coefficients[j],
+      );
+      const label = document.createElement("b");
+      label.textContent = `d${i}`;
+      row.append(label);
+      [...terms, query[i]].forEach((v, j) => {
+        const cell = document.createElement("span");
+        cell.className = "component-term";
+        const bar = document.createElement("i");
+        bar.style.width = `${Math.min(100, Math.abs(v) * 100)}%`;
+        bar.dataset.sign = v < 0 ? "negative" : "positive";
+        const value = document.createElement("code");
+        value.textContent = `${j === 3 ? "= " : j > 0 ? "+ " : ""}${v.toFixed(3)}`;
+        cell.append(bar, value);
+        row.append(cell);
+      });
+      chart.append(row);
+    }
     const best = space.manifest.tokens[currentNeighbors[0].index].label;
 
     const labels = [a, b, c].map((i) => space.manifest.tokens[i].label);
 
     const queen =
-      labels.join("|") === "king|man|woman"
+      classic && labels.join("|") === "king|man|woman"
         ? ` Queen ranks #${space.manifest.referenceAnalogy.queenRank} in this subset.`
         : "";
 
     element("analogy-note").textContent =
-      `${labels[0]} − ${labels[1]} + ${labels[2]} → ${best} (cosine ${currentNeighbors[0].score.toFixed(3)}).${queen} This is a nearest match, not an exact equality.`;
+      `${expression} (${labels.join(", ")}) → ${best} (cosine ${currentNeighbors[0].score.toFixed(3)}).${queen} This is a nearest match, not an exact equality.`;
   } catch (e) {
     error((e as Error).message);
   }
@@ -231,6 +274,23 @@ element("search-form").addEventListener("submit", (event) => {
 });
 
 element("analogy-form").addEventListener("submit", runAnalogy);
+["alpha", "beta", "gamma"].forEach((id) =>
+  input(id).addEventListener("input", () => {
+    const classic =
+      ["alpha", "beta", "gamma"]
+        .map((key) => Number(input(key).value))
+        .join(",") === "1,-1,1";
+    document.querySelector<HTMLButtonElement>(".calculate")!.textContent =
+      classic ? "Explore A − B + C →" : "Explore weighted sum →";
+  }),
+);
+element("replay-arithmetic").addEventListener("click", () => {
+  scene?.replay();
+  input("arithmetic-scrub").value = "0";
+});
+input("arithmetic-scrub").addEventListener("input", () =>
+  scene?.scrub(Number(input("arithmetic-scrub").value) / 100),
+);
 
 element("reset-view").addEventListener("click", () => scene?.reset());
 
@@ -263,7 +323,9 @@ input("depth").addEventListener("input", () => space && slice());
 
 input("width").addEventListener("input", () => space && slice());
 
-window.addEventListener("pagehide", () => scene?.dispose(), { once: true });
+window.addEventListener("pagehide", (event) => {
+  if (!event.persisted) scene?.dispose();
+});
 
 // Validate the exported embeddings before creating WebGL resources.
 loadSpace()
@@ -284,6 +346,10 @@ loadSpace()
 
     try {
       scene = new BrainScene(element("space"), space, select, fallback);
+      scene.setAnimationOutput(
+        element("arithmetic-status"),
+        element("component-chart"),
+      );
     } catch (e) {
       console.warn("3D unavailable:", e);
       fallback();

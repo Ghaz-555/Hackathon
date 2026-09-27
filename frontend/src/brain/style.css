@@ -540,3 +540,123 @@ footer {
     line-height: 1.8;
   }
 }
+
+[hidden] {
+  display: none !important;
+}
+.coefficient-controls {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+.coefficient-controls label {
+  font-size: 10px;
+  color: #9aacc1;
+  flex: 1;
+  min-width: 0;
+}
+.coefficient-controls input {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  background: #111f30;
+  border: 1px solid #304355;
+  border-radius: 5px;
+  padding: 7px;
+  color: #d9e6ee;
+}
+.arithmetic-playback {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 15px 24px;
+  border-top: 1px solid #25394b;
+}
+.arithmetic-playback button {
+  background: #263950;
+  border: 1px solid #52677b;
+  border-radius: 5px;
+  color: #dde8fa;
+  padding: 8px 12px;
+}
+.arithmetic-playback label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+}
+.arithmetic-playback input {
+  width: 120px;
+  accent-color: #b2a1fa;
+}
+#arithmetic-status {
+  position: relative;
+  padding: 8px 0;
+  color: #c6b6ef;
+  font: 11px monospace;
+}
+#arithmetic-status:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--arithmetic-progress, 0%);
+  height: 2px;
+  background: #b2a1fa;
+}
+.vector-calculation {
+  margin: 24px 0;
+  padding-top: 16px;
+  border-top: 1px solid #29384d;
+}
+.vector-calculation p {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #8494a9;
+}
+#component-chart {
+  margin: 14px 0;
+}
+#component-chart > div {
+  display: grid;
+  grid-template-columns: 20px repeat(4, 1fr);
+  gap: 4px;
+  margin: 6px 0;
+  align-items: center;
+}
+#component-chart b {
+  font: 9px monospace;
+  color: #8e9ba9;
+}
+.component-term {
+  position: relative;
+  background: #162331;
+  border-radius: 3px;
+  overflow: hidden;
+  padding: 6px 2px;
+}
+.component-term i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #356c5c;
+  opacity: 0.5;
+}
+.component-term i[data-sign="negative"] {
+  background: #6563a7;
+}
+.component-term code {
+  position: relative;
+  font-size: 9px;
+  color: #cfdde9;
+}
+
+#component-chart[data-phase="0"] .component-term:nth-child(2),
+#component-chart[data-phase="1"] .component-term:nth-child(3),
+#component-chart[data-phase="2"] .component-term:nth-child(4),
+#component-chart[data-phase="3"] .component-term:nth-child(5) {
+  outline: 1px solid #9bbaa9;
+  background: #294136;
+}

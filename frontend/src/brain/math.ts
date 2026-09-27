@@ -50,6 +50,24 @@ export class EmbeddingSpace {
     const d = this.manifest.dimensions;
     return this.vectors.subarray(i * d, (i + 1) * d);
   }
+  combination(indices: number[], coefficients: number[]) {
+    if (
+      indices.length !== coefficients.length ||
+      !indices.length ||
+      indices.some(
+        (i) => !Number.isInteger(i) || i < 0 || i >= this.manifest.count,
+      ) ||
+      coefficients.some((c) => !Number.isFinite(c))
+    )
+      throw new Error("Invalid vector coefficients.");
+    const query = new Float64Array(this.manifest.dimensions);
+    indices.forEach((index, j) =>
+      this.vector(index).forEach((v, i) => {
+        query[i] += coefficients[j] * v;
+      }),
+    );
+    return query;
+  }
   analogy(a: number, b: number, c: number) {
     const av = this.vector(a),
       bv = this.vector(b),

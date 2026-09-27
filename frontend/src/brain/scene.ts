@@ -12,6 +12,8 @@ export type AnalogyView = {
   c: number;
   result: [number, number, number];
   nearest: number;
+  steps: [number, number, number][];
+  expression: string;
 };
 export class BrainScene {
   private scene = new THREE.Scene();
@@ -36,6 +38,10 @@ export class BrainScene {
   private motion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
   private pulse: THREE.Mesh;
   private animationStart = 0;
+  private animationProgress: number | null = null;
+  private animatedArrows: THREE.Group[] = [];
+  private animationOutput: HTMLElement | null = null;
+  private arithmeticChart: HTMLElement | null = null;
   private pointerStart: [number, number] = [0, 0];
   constructor(
     private host: HTMLElement,
@@ -148,16 +154,41 @@ export class BrainScene {
     if (this.disposed) return;
     this.raf = requestAnimationFrame(this.tick);
     this.controls.update();
-    if (this.analogy && this.motion) {
-      const t = Math.min(1, (performance.now() - this.animationStart) / 1800);
-      this.pulse.visible = t < 1;
-      this.pulse.position.lerpVectors(
-        new THREE.Vector3(
-          ...this.space.manifest.tokens[this.analogy.a].position,
+    if (this.analogy) {
+      const t =
+        this.animationProgress ??
+        (this.motion
+          ? Math.min(1, (performance.now() - this.animationStart) / 6400)
+          : 1);
+      const part = Math.min(2, Math.floor(t * 3));
+      const fraction = Math.min(1, t * 3 - part);
+      this.animatedArrows.forEach((arrow) =>
+        arrow.scale.setScalar(
+          Math.max(0.00001, Math.min(1, t * 3 - arrow.userData.step)),
         ),
-        new THREE.Vector3(...this.analogy.result),
-        t,
       );
+      this.pulse.visible = this.motion && t < 1;
+      this.pulse.position.lerpVectors(
+        new THREE.Vector3(...this.analogy.steps[part]),
+        new THREE.Vector3(...this.analogy.steps[part + 1]),
+        fraction,
+      );
+      if (this.arithmeticChart)
+        this.arithmeticChart.dataset.phase = String(t >= 1 ? 3 : part);
+      if (this.animationOutput) {
+        this.animationOutput.textContent =
+          t >= 1
+            ? "Sum complete · nearest neighbors ranked in 768D"
+            : [
+                "1 / 3 · Scale A",
+                "2 / 3 · Add scaled B",
+                "3 / 3 · Add scaled C",
+              ][part];
+        this.animationOutput.style.setProperty(
+          "--arithmetic-progress",
+          `${t * 100}%`,
+        );
+      }
     } else this.pulse.visible = false;
     this.renderer.render(this.scene, this.camera);
     this.labels.render(this.scene, this.camera);
@@ -203,13 +234,24 @@ export class BrainScene {
     dot.position.copy(position);
     this.marks.add(dot);
   }
-  private arrow(from: THREE.Vector3, to: THREE.Vector3, color: string) {
+  private arrow(
+    from: THREE.Vector3,
+    to: THREE.Vector3,
+    color: string,
+    step: number,
+  ) {
     const delta = to.clone().sub(from),
       length = delta.length();
     if (length < 1e-7) return;
     // Own the geometry so clearing one scene never disposes shared arrow buffers.
+    const group = new THREE.Group();
+    group.position.copy(from);
+    group.userData.step = step;
     const line = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([from, to]),
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(),
+        delta.clone(),
+      ]),
       new THREE.LineBasicMaterial({ color }),
     );
     const cone = new THREE.Mesh(
@@ -220,12 +262,14 @@ export class BrainScene {
       ),
       new THREE.MeshBasicMaterial({ color }),
     );
-    cone.position.copy(to);
+    cone.position.copy(delta);
     cone.quaternion.setFromUnitVectors(
       new THREE.Vector3(0, 1, 0),
       delta.normalize(),
     );
-    this.paths.add(line, cone);
+    group.add(line, cone);
+    this.paths.add(group);
+    this.animatedArrows.push(group);
   }
   private rebuild() {
     const { tokens } = this.space.manifest;
@@ -263,6 +307,7 @@ export class BrainScene {
     this.points.geometry.computeBoundingSphere();
     this.clear(this.marks);
     this.clear(this.paths);
+    this.animatedArrows = [];
     const decorated = new Set<number>();
     const mark = (
       i: number,
@@ -284,13 +329,31 @@ export class BrainScene {
       mark(nearest, "#88ead0", true, [-30, -35]);
       const position = new THREE.Vector3(...result);
       this.dot(position, "#faf2d4", 0.14);
-      this.label("A − B + C", position, "#faf2d4", true, [35, -5]);
-      this.arrow(
-        new THREE.Vector3(...tokens[b].position),
-        new THREE.Vector3(...tokens[c].position),
-        "#aa91ef",
+      this.label(this.analogy.expression, position, "#faf2d4", true, [35, -5]);
+      const steps = this.analogy.steps;
+      this.label(
+        "zero vector",
+        new THREE.Vector3(...steps[0]),
+        "#8ea0b8",
+        true,
+        [-20, 20],
       );
-      this.arrow(new THREE.Vector3(...tokens[a].position), position, "#f2c17b");
+      for (let i = 0; i < 3; i++) {
+        this.arrow(
+          new THREE.Vector3(...steps[i]),
+          new THREE.Vector3(...steps[i + 1]),
+          ["#f2c17b", "#e79097", "#b2a1fa"][i],
+          i,
+        );
+        if (i < 2)
+          this.label(
+            ["αA", "αA + βB"][i],
+            new THREE.Vector3(...steps[i + 1]),
+            ["#f2c17b", "#e79097"][i],
+            true,
+            [15, -30],
+          );
+      }
       const geometry = new THREE.BufferGeometry().setFromPoints([
         position,
         new THREE.Vector3(...tokens[nearest].position),
@@ -337,7 +400,19 @@ export class BrainScene {
     this.neighbors = neighbors;
     this.analogy = analogy;
     this.animationStart = performance.now();
+    this.animationProgress = null;
     this.rebuild();
+  }
+  replay() {
+    this.animationStart = performance.now();
+    this.animationProgress = null;
+  }
+  scrub(progress: number) {
+    this.animationProgress = Math.max(0, Math.min(1, progress));
+  }
+  setAnimationOutput(element: HTMLElement, chart: HTMLElement) {
+    this.animationOutput = element;
+    this.arithmeticChart = chart;
   }
   setSlice(center: number, thickness: number) {
     this.slice = center;

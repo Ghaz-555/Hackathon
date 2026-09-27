@@ -83,3 +83,42 @@ test("PCA basis is orthonormal", () => {
         i === j ? 1 : 0,
       );
 });
+
+test("weighted sums project from the projected zero, not the plot origin", () => {
+  const ids = ["king", "man", "woman"].map(index),
+    scales = [2, -0.5, 0.25];
+  const query = space.combination(ids, scales);
+  query.forEach((v, i) =>
+    close(
+      v,
+      ids.reduce((sum, id, j) => sum + scales[j] * space.vector(id)[i], 0),
+    ),
+  );
+  const zero = space.project(new Float64Array(768));
+  space
+    .project(query)
+    .forEach((v, i) =>
+      close(
+        v,
+        zero[i] +
+          ids.reduce(
+            (sum, id, j) =>
+              sum + scales[j] * (manifest.tokens[id].position[i] - zero[i]),
+            0,
+          ),
+        1e-5,
+      ),
+    );
+});
+test("weighted sums reject invalid input and cancellation has no cosine direction", () => {
+  assert.throws(() => space.combination([0], [Infinity]), /Invalid/);
+  assert.throws(() => space.combination([-1], [1]), /Invalid/);
+  assert.throws(() => space.combination([0, 1], [1]), /Invalid/);
+  assert.throws(
+    () => space.nearest(space.combination([0, 0], [1, -1])),
+    /zero/,
+  );
+  space
+    .combination([0, 1], [0, 1])
+    .forEach((v, i) => close(v, space.vector(1)[i]));
+});
