@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glasswork-v1"
+version = "0.1.0"
+description = "Inspectable NumPy transformer for learning language-model mathematics"
+requires-python = ">=3.12"
+dependencies = ["numpy==2.5.3"]
+
+[tool.setuptools.packages.find]
+include = ["glasswork*"]

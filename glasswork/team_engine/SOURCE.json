@@ -1,0 +1,15 @@
+{
+  "source": "/home/sawoo/Downloads/Hackathon/backend",
+  "license": "MIT, Copyright (c) 2026 Ghaz-555",
+  "original_sha256": {
+    "model.py": "808a6fbc48f2292c434c2be72eebf5917a49c5474f68ae375c90e6c79aa33b1c",
+    "gradients.py": "4d333008a242673114a38197875dc9b80bf422e609255d8a374108a648ac9e68",
+    "attention.py": "5d44df6bf33b984d95149e9f6df8035699a7e7c3725c75607ba09168b2f88a0c",
+    "embeddings.py": "ceafa99332efd6045fb3f917f59f249bc0cb8fe641a984b6f6cabc3a4c3e326a",
+    "positional.py": "5c54fbe121c7ff3dbbd909e0a9a2e599f675fae66a6a53628231aa2727252943",
+    "output.py": "6529a13312fe10fdec4447a0a0838ef9f1b2b84d620cd50deceac1e0ffdfe66d",
+    "loss.py": "8c5a318fa283dc38406f2f6e2949349f00a3c2279e5b69dd01612640032828f8",
+    "tokenizer.py": "4943d1762be2d0fef56928633cce692a4e84f005104f8e169e27cbe9b27e2049",
+    "dataset.py": "0e5ee647550174cecec573bc66d45f2d4f56ca6f4b28dfca386548e97d0ae4e1"
+  }
+}

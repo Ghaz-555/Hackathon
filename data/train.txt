@@ -1,0 +1,42 @@
+the red cat sits on the mat.
+the blue bird flies in the sky.
+the green frog jumps in the pond.
+the small dog runs in the park.
+the yellow sun shines on the hill.
+the red bird sits in the tree.
+the blue fish swims in the pond.
+the small cat sleeps on the mat.
+the green tree grows on the hill.
+the dog sees the red ball.
+the cat sees the blue bird.
+the frog sees the small fish.
+a red ball rolls on the path.
+a small bird sings in the tree.
+a green leaf falls in the pond.
+a blue fish hides by the rock.
+the sun is bright.
+the pond is blue.
+the tree is green.
+the ball is red.
+the cat is small.
+the bird is yellow.
+the dog runs to the tree.
+the cat walks to the pond.
+the frog jumps to the rock.
+the bird flies to the hill.
+we see a red cat.
+we see a blue fish.
+we see a green tree.
+we see a small dog.
+the red cat sees the small dog.
+the blue bird sees the green frog.
+the small fish swims by the green leaf.
+the yellow bird sings by the blue pond.
+the dog sits by the red ball.
+the cat sleeps by the green tree.
+the frog sits on the small rock.
+the bird sings on the green hill.
+the rain falls on the tree.
+the wind moves the green leaf.
+the sun shines on the blue pond.
+the small dog sees the yellow sun.

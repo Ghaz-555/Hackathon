@@ -1,0 +1,228 @@
+{
+  "config": {
+    "vocab_size": 26,
+    "context_length": 32,
+    "d_model": 32,
+    "n_heads": 2,
+    "n_layers": 2,
+    "d_ff": 128,
+    "seed": 42
+  },
+  "parameters": 28186,
+  "steps": 1200,
+  "batch_size": 8,
+  "history": [
+    {
+      "step": 0,
+      "train": 3.2536165292553747,
+      "validation": 3.2602316849823314
+    },
+    {
+      "step": 50,
+      "train": 1.7024549484522908,
+      "validation": 1.7480578146027905,
+      "minibatch_loss": 1.5995683138478016,
+      "gradient_norm": 0.999871186415046,
+      "clip_scale": 1.0
+    },
+    {
+      "step": 100,
+      "train": 1.4745294739990535,
+      "validation": 1.4929114176498957,
+      "minibatch_loss": 1.4227025155598119,
+      "gradient_norm": 2.182748781946265,
+      "clip_scale": 0.4581379260275395
+    },
+    {
+      "step": 150,
+      "train": 1.295150944283001,
+      "validation": 1.3796173745040734,
+      "minibatch_loss": 1.1748433237220839,
+      "gradient_norm": 1.4793845968573727,
+      "clip_scale": 0.6759567472341406
+    },
+    {
+      "step": 200,
+      "train": 1.1723017692191342,
+      "validation": 1.3010437980398097,
+      "minibatch_loss": 1.1707082530770445,
+      "gradient_norm": 2.446860401061166,
+      "clip_scale": 0.4086869849895463
+    },
+    {
+      "step": 250,
+      "train": 1.0033142276146791,
+      "validation": 1.083056697913506,
+      "minibatch_loss": 0.9374768534256421,
+      "gradient_norm": 2.3550986306186164,
+      "clip_scale": 0.424610666831108
+    },
+    {
+      "step": 300,
+      "train": 0.9028237017716304,
+      "validation": 1.0447713872147717,
+      "minibatch_loss": 0.9143186710705584,
+      "gradient_norm": 2.851530321721491,
+      "clip_scale": 0.35068888883366045
+    },
+    {
+      "step": 350,
+      "train": 0.7361996730269308,
+      "validation": 0.8754508891980496,
+      "minibatch_loss": 0.72521313724088,
+      "gradient_norm": 2.2976389919220477,
+      "clip_scale": 0.4352293826470399
+    },
+    {
+      "step": 400,
+      "train": 0.6857922050607402,
+      "validation": 0.8050474154997176,
+      "minibatch_loss": 0.7172728150058248,
+      "gradient_norm": 3.965040471712768,
+      "clip_scale": 0.25220423527430796
+    },
+    {
+      "step": 450,
+      "train": 0.5912483103569868,
+      "validation": 0.7549521370779823,
+      "minibatch_loss": 0.5261582669268232,
+      "gradient_norm": 2.093736227812943,
+      "clip_scale": 0.47761508193635804
+    },
+    {
+      "step": 500,
+      "train": 0.547754329994571,
+      "validation": 0.6422495397669449,
+      "minibatch_loss": 0.48448747637161155,
+      "gradient_norm": 1.854805722422928,
+      "clip_scale": 0.5391400230821493
+    },
+    {
+      "step": 550,
+      "train": 0.4619895731788426,
+      "validation": 0.5938032244980661,
+      "minibatch_loss": 0.46986859987158247,
+      "gradient_norm": 2.6810562676867593,
+      "clip_scale": 0.37298732296387405
+    },
+    {
+      "step": 600,
+      "train": 0.4561940598365077,
+      "validation": 0.6313184085969543,
+      "minibatch_loss": 0.5216476000377221,
+      "gradient_norm": 2.3456578681531606,
+      "clip_scale": 0.42631963236281506
+    },
+    {
+      "step": 650,
+      "train": 0.4451218454686711,
+      "validation": 0.6872583725882939,
+      "minibatch_loss": 0.4618172652672565,
+      "gradient_norm": 2.159190068334406,
+      "clip_scale": 0.4631366245452387
+    },
+    {
+      "step": 700,
+      "train": 0.4536092490165442,
+      "validation": 0.7346525316149088,
+      "minibatch_loss": 0.4901990237516146,
+      "gradient_norm": 2.687264051944945,
+      "clip_scale": 0.37212569389161293
+    },
+    {
+      "step": 750,
+      "train": 0.38205648527459646,
+      "validation": 0.6973158867938904,
+      "minibatch_loss": 0.3666500223381283,
+      "gradient_norm": 2.5504205693215356,
+      "clip_scale": 0.3920921953142891
+    },
+    {
+      "step": 800,
+      "train": 0.397629024578669,
+      "validation": 0.681738215057663,
+      "minibatch_loss": 0.3660851177295864,
+      "gradient_norm": 2.3531346569030642,
+      "clip_scale": 0.4249650554703442
+    },
+    {
+      "step": 850,
+      "train": 0.34984375093315423,
+      "validation": 0.6674418191786882,
+      "minibatch_loss": 0.4450790607865247,
+      "gradient_norm": 2.7601138579332125,
+      "clip_scale": 0.36230389450267286
+    },
+    {
+      "step": 900,
+      "train": 0.3559177461629848,
+      "validation": 0.7454218767912083,
+      "minibatch_loss": 0.275729738173579,
+      "gradient_norm": 2.184445511979236,
+      "clip_scale": 0.45778207536700755
+    },
+    {
+      "step": 950,
+      "train": 0.32940177802891035,
+      "validation": 0.741192635468142,
+      "minibatch_loss": 0.30957268601196725,
+      "gradient_norm": 1.8355114318451164,
+      "clip_scale": 0.5448072851253054
+    },
+    {
+      "step": 1000,
+      "train": 0.3080267084109574,
+      "validation": 0.7070296126076998,
+      "minibatch_loss": 0.343956747447317,
+      "gradient_norm": 2.2335912230592,
+      "clip_scale": 0.44770949566607227
+    },
+    {
+      "step": 1050,
+      "train": 0.3117543304941729,
+      "validation": 0.7058539190329182,
+      "minibatch_loss": 0.27888037518636105,
+      "gradient_norm": 1.4210449564544985,
+      "clip_scale": 0.703707504437436
+    },
+    {
+      "step": 1100,
+      "train": 0.30198610380392876,
+      "validation": 0.7363160093468238,
+      "minibatch_loss": 0.36029266846260855,
+      "gradient_norm": 3.0895980772642715,
+      "clip_scale": 0.32366669547045557
+    },
+    {
+      "step": 1150,
+      "train": 0.2743564042825877,
+      "validation": 0.7302183030824008,
+      "minibatch_loss": 0.2968526120188132,
+      "gradient_norm": 1.915351886834502,
+      "clip_scale": 0.5220972745915101
+    },
+    {
+      "step": 1200,
+      "train": 0.30064870009583944,
+      "validation": 0.6750375695346419,
+      "minibatch_loss": 0.30004333972011205,
+      "gradient_norm": 1.8618752552486058,
+      "clip_scale": 0.5370929105916259
+    }
+  ],
+  "elapsed_seconds": 28.957245679999687,
+  "median_step_ms": 22.72377650024282,
+  "tokens_per_second_training_only": 11107.611075451949,
+  "environment": {
+    "python": "3.14.7",
+    "numpy": "2.5.3",
+    "platform": "Linux-7.2.7-1-cachyos-x86_64-with-glibc2.44"
+  },
+  "data_sha256": {
+    "train": "171e761f747c4733fd6fd95429d47f9946cf83f4be42038037520ee73799ab18",
+    "validation": "fbcbd109ae6cca7846236bd5b7dac9abb28efa7760676cfc9fd7e8b2c21b1052"
+  },
+  "notes": "Original narrow toy corpus. Held-out loss measures this corpus, not general language ability.",
+  "sample_temperature_0": "the blue bird flies in the sky.\nthe green frog jumps in the pond.\nthe blue pond is blue.\nthe tree frog.\n",
+  "sample_temperature_0.8": "the pond.\na blue fish hides by the blue fish.\nwe see a green frog.\nthe sun shines on the blue frog.\nthe "
+}
