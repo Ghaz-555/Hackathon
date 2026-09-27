@@ -78,3 +78,7 @@ The CPU math is unchanged by these rendering effects. Long contexts use a bounde
 Evidence: `artifacts/main2-python-tests.txt`, `main2-math-tests.txt`,
 `main2-model-browser-results.json`, `main2-integrated-browser.json`, and
 `main2-build.txt`.
+
+## Publication history
+
+The first integration push was rejected because an inherited commit contained a 147 MB downloaded model cache. The unpublished `main2` history was rebuilt to exclude `.cache/` files, preserving commit messages and attribution. The final application tree was verified identical before adding this note and the cache ignore rule. Original local `main` and `frontend` branches were left unchanged. Downloaded caches are regenerated locally and must not be committed.

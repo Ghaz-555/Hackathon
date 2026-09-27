@@ -4,7 +4,7 @@ __pycache__/
 .env
 node_modules/
 frontend/dist/
-frontend/.cache/
+.cache/
 *.tsbuildinfo
 .pytest_cache/
 *.egg-info/
