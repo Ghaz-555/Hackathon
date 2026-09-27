@@ -5,12 +5,13 @@ Install Playwright + Chromium in the invoking Python environment. All requests
 are confined to the local application; no external assets or APIs are needed.
 """
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts'
-BASE = 'http://127.0.0.1:8001'
+BASE = os.environ.get('GLASSWORK_URL', 'http://127.0.0.1:8001')
 checks = []
 
 def check(name):
@@ -20,12 +21,14 @@ def check(name):
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
     page = browser.new_page(viewport={'width': 1600, 'height': 1050})
+    page.add_init_script("sessionStorage.setItem('glasswork-engine','team')")
     errors = []
     page.on('pageerror', lambda e: errors.append(str(e)))
     page.route('**/*', lambda r: r.continue_() if r.request.url.startswith(BASE) else r.abort())
     page.goto(BASE, wait_until='networkidle')
     expect(page.get_by_role('button', name='Inspect prompt', exact=True)).to_be_enabled()
     expect(page.locator('canvas')).to_be_visible()
+    page.get_by_role('button', name='Architecture', exact=True).click()
     expect(page.locator('.world-label')).to_have_count(6)
     page.wait_for_timeout(1000)
     check('Real WebGL scene and all six world labels')
@@ -42,7 +45,7 @@ with sync_playwright() as p:
     assert baseline['engine_id'] == 'team-glassbox-v1'
     expect(page.get_by_label('Selected character')).to_have_value('6')
     expect(page.locator('.vector code')).to_have_count(4)
-    page.screenshot(path=str(OUT/'main2-model-desktop.png'), full_page=True)
+    page.screenshot(path=str(OUT/'expanded-original-model-desktop.png'), full_page=True)
     check('Correct active engine and selected final character')
 
     for name in ['Position', 'Q · K · V', 'Attention', 'Projection', 'Probabilities', 'Embedding']:
@@ -67,7 +70,7 @@ with sync_playwright() as p:
     page.get_by_role('button', name='Focus selected stage', exact=True).click()
     expect(page.get_by_role('button', name='Focus selected stage', exact=True)).to_have_attribute('aria-pressed', 'true')
     page.wait_for_timeout(400)
-    page.screenshot(path=str(OUT/'main2-model-attention-focus.png'), full_page=True)
+    page.screenshot(path=str(OUT/'expanded-original-model-attention-focus.png'), full_page=True)
     page.get_by_role('button', name='Reset camera', exact=True).click()
     expect(page.get_by_role('button', name='Focus selected stage', exact=True)).to_have_attribute('aria-pressed', 'false')
     check('Orbit, zoom, focus and reset camera controls')
@@ -76,6 +79,7 @@ with sync_playwright() as p:
     page.get_by_role('button', name='Play walkthrough', exact=True).click()
     expect(page.locator('.inspector h2')).to_have_text('Position', timeout=10000)
     page.get_by_role('button', name='Pause walkthrough', exact=True).click()
+    page.get_by_role('button', name='Architecture', exact=True).click()
     page.get_by_role('button', name='Reduce motion', exact=True).click()
     expect(page.get_by_role('button', name='Reduce motion', exact=True)).to_have_attribute('aria-pressed', 'true')
     check('Animated walkthrough, pause and reduced motion')
@@ -112,7 +116,7 @@ with sync_playwright() as p:
     assert state()['step'] == 26
     assert len(state()['history']) == 27
     expect(page.locator('.recharts-surface')).to_be_visible()
-    page.screenshot(path=str(OUT/'main2-model-learning.png'), full_page=True)
+    page.screenshot(path=str(OUT/'expanded-original-model-learning.png'), full_page=True)
     check('Random reset, one-step and 25-step training, actual weight deltas, loss chart')
 
     # Keep a request in flight long enough to deterministically test stopping.
@@ -157,6 +161,7 @@ with sync_playwright() as p:
     expect(page.locator('.inspector h2')).to_have_text('Attention')
     page.get_by_role('button', name='3D view', exact=True).click()
     expect(page.locator('canvas')).to_be_visible()
+    page.get_by_role('button', name='Architecture', exact=True).click()
     expect(page.locator('.world-label')).to_have_count(6)
     # A lost GPU context must preserve the lesson via its diagram fallback.
     page.locator('canvas').evaluate("canvas => canvas.dispatchEvent(new Event('webglcontextlost', {cancelable:true}))")
@@ -167,7 +172,7 @@ with sync_playwright() as p:
     page.set_viewport_size({'width':390,'height':844})
     page.evaluate('window.scrollTo(0,0)')
     page.wait_for_timeout(600)
-    page.screenshot(path=str(OUT/'main2-model-mobile.png'), full_page=True)
+    page.screenshot(path=str(OUT/'expanded-original-model-mobile.png'), full_page=True)
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Mobile horizontal overflow'
     page.get_by_role('button', name='Experiment', exact=True).click()
     expect(page.get_by_role('button', name='Generate 64 characters')).to_be_visible()
@@ -176,7 +181,7 @@ with sync_playwright() as p:
     assert not errors, errors
     check('No uncaught browser exceptions, external requests blocked')
     result = {'browser':'Chromium with software WebGL', 'result':'PASS', 'checks':checks, 'page_errors':errors}
-    (OUT/'main2-model-browser-results.json').write_text(json.dumps(result, indent=2)+'\n')
+    (OUT/'expanded-original-model-browser-results.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result, indent=2))
     page.evaluate("async () => fetch('/api/sessions/'+sessionStorage.getItem('glasswork-session'), {method:'DELETE'})")
     browser.close()

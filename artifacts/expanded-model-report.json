@@ -1,0 +1,13 @@
+{
+  "parameters": 28186,
+  "checkpoint_steps": 1200,
+  "metrics": {
+    "step": 1200,
+    "train": 0.30064870009583944,
+    "validation": 0.6750375695346419
+  },
+  "sample_seed_7_temperature_0.7": "the cat sleeps on the mat.\nthe blue fish hides by the green frog.\nthe see small fish.\nth",
+  "corpus_characters": 1207,
+  "validation_characters": 243,
+  "notes": "Existing checkpoint, re-evaluated through the connected adapter. Original narrow corpus; not a general language benchmark."
+}

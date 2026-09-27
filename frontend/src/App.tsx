@@ -76,6 +76,7 @@ export default function App() {
     [playing, setPlaying] = useState(false),
     [focus, setFocus] = useState(true),
     [cameraReset, setCameraReset] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState<number | null>(null),
     [dimension, setDimension] = useState(0);
   const [draft, setDraft] = useState(lab.prompt),
@@ -99,19 +100,14 @@ export default function App() {
   }, [reduced]);
   useEffect(() => {
     if (!playing) return;
-    const timer = setInterval(
-      () =>
-        setStage((i) => {
-          if (i === 5) {
-            setPlaying(false);
-            return i;
-          }
-          return i + 1;
-        }),
-      6400,
-    );
-    return () => clearInterval(timer);
-  }, [playing]);
+    const timer = setTimeout(() => {
+      if (stage === 5) {
+        setPlaying(false);
+        setPaused(true);
+      } else setStage(stage + 1);
+    }, 6400);
+    return () => clearTimeout(timer);
+  }, [playing, stage]);
   useEffect(() => {
     setToken(Math.max(0, (data?.trace.tokens.length ?? 1) - 1));
   }, [data?.prompt]);
@@ -124,6 +120,7 @@ export default function App() {
   }, []);
   const select = (i: number) => {
     setStage(i);
+    setPaused(false);
     setProgress(null);
     setPlaying(false);
     setHover("Hover over a tile to inspect its value");
@@ -211,16 +208,15 @@ export default function App() {
           </div>
           <div className="scene-mode" aria-label="Scene mode">
             <button
-              aria-pressed={!focus && !playing}
+              aria-pressed={!focus}
               onClick={() => {
                 setFocus(false);
-                setPlaying(false);
               }}
             >
               Architecture
             </button>
             <button
-              aria-pressed={focus || playing}
+              aria-pressed={focus}
               onClick={() => {
                 setFocus(true);
                 setProgress(null);
@@ -302,6 +298,7 @@ export default function App() {
                     stage={stage}
                     token={row}
                     playing={playing}
+                    paused={paused}
                     progress={progress}
                     dimension={dimensionStart}
                     reduced={reduced}
@@ -316,10 +313,11 @@ export default function App() {
               </CanvasBoundary>
             )}
           </div>
-          {(focus || playing) && !diagram && (
+          {focus && !diagram && (
             <div className="journey-controls">
               <button
                 onClick={() => {
+                  setPaused(false);
                   setProgress(null);
                   setCameraReset((v) => v + 1);
                 }}
@@ -385,6 +383,8 @@ export default function App() {
                 aria-label="Reset camera"
                 onClick={() => {
                   setFocus(false);
+                  setPlaying(false);
+                  setPaused(false);
                   setCameraReset((v) => v + 1);
                 }}
                 disabled={diagram}
@@ -429,9 +429,9 @@ export default function App() {
                 disabled={!data}
                 onClick={() => {
                   if (stage === 5) setStage(0);
-                  setFocus(true);
+                  setPaused(playing);
                   setProgress(null);
-                  setCameraReset((v) => v + 1);
+                  if (!playing) setCameraReset((v) => v + 1);
                   setPlaying((v) => !v);
                 }}
                 aria-label={playing ? "Pause walkthrough" : "Play walkthrough"}

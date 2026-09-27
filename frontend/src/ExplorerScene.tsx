@@ -28,6 +28,7 @@ type Props = {
   stage: number;
   token: number;
   playing: boolean;
+  paused: boolean;
   progress: number | null;
   dimension: number;
   reduced: boolean;
@@ -97,6 +98,9 @@ function Tensor({
     height = rows * pitch;
   const depths = useRef<number[]>([]),
     matrix = useMemo(() => new THREE.Matrix4(), []),
+    cellPosition = useMemo(() => new THREE.Vector3(), []),
+    cellScale = useMemo(() => new THREE.Vector3(), []),
+    cellRotation = useMemo(() => new THREE.Quaternion(), []),
     base = useMemo(() => new THREE.Color(color), [color]),
     shade = useMemo(() => new THREE.Color(), []);
   const revision = values.flat().join(",");
@@ -115,13 +119,13 @@ function Tensor({
           : target;
         depths.current[i] = depth;
         matrix.compose(
-          new THREE.Vector3(
+          cellPosition.set(
             (c - (cols - 1) / 2) * pitch,
             ((rows - 1) / 2 - r) * pitch,
             depth / 2,
           ),
-          new THREE.Quaternion(),
-          new THREE.Vector3(pitch * 0.83, pitch * 0.83, masked ? 0.018 : depth),
+          cellRotation,
+          cellScale.set(pitch * 0.83, pitch * 0.83, masked ? 0.018 : depth),
         );
         mesh.current!.setMatrixAt(i, matrix);
         shade.copy(
@@ -412,21 +416,27 @@ function CameraRig({
   const initialized = useRef(false);
   const follow = props.focus || props.playing;
   useEffect(() => {
-    const center = follow
+    const center = props.focus
       ? new THREE.Vector3(0, 0, 0)
-      : new THREE.Vector3(0, -0.8, 0);
+      : props.playing
+        ? new THREE.Vector3(...centers[props.stage])
+        : new THREE.Vector3(0, -0.8, 0);
     destination.current = {
       eye: center
         .clone()
         .add(
-          follow
+          props.focus
             ? new THREE.Vector3(1.5, 1.2, 16)
-            : new THREE.Vector3(8, 6, 21),
+            : props.playing
+              ? new THREE.Vector3(5, 3, 14)
+              : new THREE.Vector3(8, 6, 21),
         ),
       target: center,
-      zoom: follow
+      zoom: props.focus
         ? Math.min(size.width / 12, size.height / 7.2)
-        : Math.min(size.width / 18, size.height / 11),
+        : props.playing
+          ? Math.min(size.width / 6, size.height / 4.8)
+          : Math.min(size.width / 18, size.height / 11),
       moving: true,
     };
     if (props.reduced || !initialized.current) {
@@ -447,6 +457,8 @@ function CameraRig({
     size.height,
     props.reset,
     follow,
+    props.focus,
+    props.playing,
     follow ? props.stage : -1,
     props.reduced,
   ]);
@@ -471,7 +483,7 @@ function CameraRig({
     controls.current?.update();
     if (camera.position.distanceTo(d.eye) < 0.005) d.moving = false;
     invalidate();
-  });
+  }, -1);
   return null;
 }
 function World(props: Props) {
@@ -480,7 +492,7 @@ function World(props: Props) {
   const expanded = data.training_scope === "all_parameters";
   const stages = lessonStages(expanded);
   const controls = useRef<OrbitControlsImpl>(null);
-  const motion = !props.reduced;
+  const motion = !props.reduced && !props.paused;
   const start = Math.max(0, Math.min(token - 7, data.trace.tokens.length - 16)),
     end = Math.min(start + 16, data.trace.tokens.length),
     rows = (v: number[][]) => v.slice(start, end);
@@ -565,13 +577,14 @@ function World(props: Props) {
         <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color="#0b141b" metalness={0.2} roughness={0.8} />
       </mesh>
-      {props.focus || props.playing ? (
+      {props.focus ? (
         <OperationJourney
           key={`${stage}-${token}-${props.reset}-${props.dimension}-${data.trace.layer_index}-${data.trace.head_index}`}
           data={data}
           stage={stage}
           token={token}
           reduced={props.reduced}
+          paused={props.paused}
           progress={props.progress}
           dimension={props.dimension}
           Label={Html}
@@ -823,7 +836,7 @@ function World(props: Props) {
       <OrbitControls
         ref={controls}
         makeDefault
-        enableDamping
+        enableDamping={!props.reduced && !props.paused}
         dampingFactor={0.08}
         minZoom={12}
         maxZoom={180}
@@ -849,7 +862,7 @@ export default function ExplorerScene(props: Props) {
             alpha: false,
             powerPreference: "high-performance",
           }}
-          frameloop={props.reduced ? "demand" : "always"}
+          frameloop={props.reduced || props.paused ? "demand" : "always"}
           fallback={<div>Use Diagram view when WebGL is unavailable.</div>}
         >
           <World {...props} />

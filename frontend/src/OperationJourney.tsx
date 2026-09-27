@@ -16,6 +16,7 @@ type Props = {
   stage: number;
   token: number;
   reduced: boolean;
+  paused: boolean;
   progress: number | null;
   dimension: number;
   Label: ComponentType<LabelProps>;
@@ -32,6 +33,7 @@ export default function OperationJourney({
   stage,
   token,
   reduced,
+  paused,
   progress,
   dimension,
   Label,
@@ -97,14 +99,12 @@ export default function OperationJourney({
           to: [0.5, -0.7, 0] as Point,
         }));
     if (stage === 4)
-      return hidden
-        .slice(d, d + 8)
-        .map((v, j) => ({
-          label: `h${d + j}`,
-          value: v,
-          from: [-3.5, j * 0.4 - 1.5, 0] as Point,
-          to: [0.4, 0, 0] as Point,
-        }));
+      return hidden.slice(d, d + 8).map((v, j) => ({
+        label: `h${d + j}`,
+        value: v,
+        from: [-3.5, j * 0.4 - 1.5, 0] as Point,
+        to: [0.4, 0, 0] as Point,
+      }));
     return data.characters.map((c, j) => ({
       label: tokenLabel(c),
       value: data.probabilities[j],
@@ -149,7 +149,7 @@ export default function OperationJourney({
     ],
   ][stage];
   useFrame((_, dt) => {
-    elapsed.current += Math.min(dt, 0.05);
+    if (!paused) elapsed.current += Math.min(dt, 0.05);
     const p =
       progress !== null
         ? progress / 100
@@ -170,7 +170,11 @@ export default function OperationJourney({
       );
       if (movingLabels.current[i])
         movingLabels.current[i]!.style.opacity =
-          stage === 3 || stage === 4 ? String(Math.max(0, 1 - local * 2)) : "1";
+          stage === 0
+            ? String(ease((local - 0.2) / 0.35))
+            : stage === 1 || stage === 3 || stage === 4
+              ? String(Math.max(0, 1 - local * 2))
+              : "1";
     });
     if (source.current)
       source.current.scale.setScalar(stage === 0 ? 1 - u * 0.28 : 1);
@@ -178,7 +182,7 @@ export default function OperationJourney({
       ribbon.current.style.setProperty("--journey-progress", `${p * 100}%`);
       ribbon.current.dataset.phase = String(Math.min(2, Math.floor(p * 3)));
     }
-  });
+  }, -2); // Move objects before Html projects labels, including demand-rendered frames.
   const caption = (text: string, at: Point, className = "journey-caption") => (
     <Label position={at} center style={{ pointerEvents: "none" }}>
       <span className={className}>{text}</span>
@@ -274,7 +278,7 @@ export default function OperationJourney({
           ))}
           {caption(
             "P moves into E. Addition is component by component.",
-            [0, 1.8, 0],
+            [0, 1.25, 0],
           )}
         </>
       )}

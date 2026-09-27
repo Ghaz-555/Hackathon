@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "checks": [
+    "Live character animation, manual scrub and all 32 embedding dimensions",
+    "Six operations, both layers, both heads, causal mask and feed-forward values",
+    "Architecture, guided playback and reduced-motion frame stability",
+    "Live probabilities, unchanged weights and reproducible word-like generation",
+    "Full-model learning lowers loss; stop, changed weights and exact checkpoint restore",
+    "Retry after a transient failure preserves the learner\u2019s model",
+    "Real analogy, scalar sums, zero-vector validation, zero-length segments and replay",
+    "Mobile views, embedding GPU fallback, and navigation retains model, prompt and temperature",
+    "Model switching, expired-session replacement and model GPU fallback",
+    "No uncaught browser errors"
+  ],
+  "page_errors": [],
+  "sample": "the cat walks to the pond.\nthe frog jumpond flies the sky.\nthe green le"
+}

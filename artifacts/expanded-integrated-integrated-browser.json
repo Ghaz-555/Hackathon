@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "checks": [
+    "live animation changes frames",
+    "reduced motion freezes animation",
+    "same-origin navigation",
+    "live model session retained",
+    "real embedding scene",
+    "computed analogy",
+    "search validation",
+    "depth slicing",
+    "camera controls",
+    "reduced motion",
+    "mobile layouts",
+    "GPU fallback"
+  ],
+  "page_errors": []
+}

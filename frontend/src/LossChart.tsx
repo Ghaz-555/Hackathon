@@ -30,8 +30,8 @@ export default function LossChartView({ data }: { data: Inspection | null }) {
         </div>
       </div>
       <p className="muted">
-        Lower is better. Both curves evaluate every next-character example in
-        the two separate sentences. Loss is measured in nats per character.
+        Lower is better. The curves evaluate next-character prediction on the
+        training and held-out corpora. Loss is measured in nats per character.
       </p>
       <div className="loss-chart">
         <ResponsiveContainer width="100%" height="100%">
