@@ -1,4 +1,4 @@
-# Glasswork
+# GlassBox
 
 **Step inside a prediction.** Watch a character become a vector, follow attention through a small transformer, train its weights, and explore the real embedding space of GPT-2.
 
@@ -121,6 +121,6 @@ The expanded browser test also captures the README screenshots from the running 
 
 ## Provenance
 
-The original team engine remains under its MIT license. The existing 28k NumPy transformer and trained checkpoint are now connected to the web lab. Integration, visualization, additional validation, and UI work were developed with AI coding assistance. The architecture explorer takes visual inspiration from [Brendan Bycroft's LLM visualization](https://bbycroft.net/llm); its code is not copied. GPT-2's pinned model revision and license accompany the embedding export.
+The original team engine remains under its MIT license.The architecture explorer takes visual inspiration from [Brendan Bycroft's LLM visualization](https://bbycroft.net/llm); its code is not copied. GPT-2's pinned model revision and license accompany the embedding export.
 
 See [expanded integration notes](docs/EXPANDED_MAIN2.md), [the earlier integration record](docs/MAIN2_INTEGRATION.md), and [historical project notes](docs/history/).
