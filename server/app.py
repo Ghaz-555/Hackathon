@@ -17,12 +17,17 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from .team_adapter import TeamEngine, DEFAULT_CHECKPOINT, ENGINE_ID
+from .transformer_adapter import TransformerEngine
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class Request(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+
+
+class CreateSession(Request):
+    engine: Literal["team", "transformer"] = "team"
 
 
 class Inspect(Request):
@@ -47,7 +52,7 @@ class Reset(Request):
 
 @dataclass
 class Session:
-    engine: TeamEngine
+    engine: TeamEngine | TransformerEngine
     mode: str = 'trained'
     revision: int = 0
     lock: Lock = field(default_factory=Lock)
@@ -91,7 +96,7 @@ def create_app(checkpoint=DEFAULT_CHECKPOINT, max_sessions=16, ttl=3600):
         return {'status': 'ok', 'engine': 'numpy', 'implementation': ENGINE_ID, 'checkpoint_available': Path(checkpoint).is_file()}
 
     @app.post('/api/sessions', status_code=201)
-    def create_session():
+    def create_session(request: CreateSession):
         # Registry lock also makes capacity checks atomic under simultaneous arrivals.
         with registry_lock:
             for sid in list(sessions):
@@ -100,7 +105,7 @@ def create_app(checkpoint=DEFAULT_CHECKPOINT, max_sessions=16, ttl=3600):
             if len(sessions) >= max_sessions:
                 raise HTTPException(503, 'The lab is full. Close an unused session or try again later.')
             try:
-                engine = TeamEngine.load(checkpoint)
+                engine = TransformerEngine.load() if request.engine == "transformer" else TeamEngine.load(checkpoint)
             except (OSError, ValueError) as error:
                 raise HTTPException(503, 'The trained checkpoint is unavailable. Run scripts/train_team.py first.') from error
             session = Session(engine)
@@ -163,7 +168,7 @@ def create_app(checkpoint=DEFAULT_CHECKPOINT, max_sessions=16, ttl=3600):
             if request.mode == 'random':
                 session.engine = session.engine.reset()
             else:
-                session.engine = TeamEngine.load(checkpoint)
+                session.engine = TransformerEngine.load() if isinstance(session.engine, TransformerEngine) else TeamEngine.load(checkpoint)
             session.mode = request.mode
             session.revision += 1
             session.history = [metrics(session)]
@@ -171,7 +176,7 @@ def create_app(checkpoint=DEFAULT_CHECKPOINT, max_sessions=16, ttl=3600):
 
     # One origin in production; Vite proxies /api during development. No broad CORS.
     dist = ROOT / 'frontend/dist'
-    if dist.is_dir():
+    if (dist / "assets").is_dir():
         app.mount('/assets', StaticFiles(directory=dist / 'assets'), name='assets')
         if (dist / 'embeddings').is_dir():
             app.mount('/embeddings', StaticFiles(directory=dist / 'embeddings'), name='embeddings')

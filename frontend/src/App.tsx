@@ -3,6 +3,7 @@ import {
   lazy,
   Suspense,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -23,8 +24,8 @@ import {
   X,
 } from "lucide-react";
 import { useLab } from "./useLab";
-import { stages } from "./stages";
-import { tokenLabel } from "./api";
+import { lessonStages } from "./stages";
+import { tokenLabel, selectTrace } from "./api";
 const Scene = lazy(() => import("./ExplorerScene"));
 const LossChart = lazy(() => import("./LossChart"));
 class CanvasBoundary extends Component<
@@ -59,7 +60,11 @@ function Values({ values, label }: { values: number[]; label: string }) {
 }
 export default function App() {
   const lab = useLab();
-  const { data } = lab;
+  const [layer, setLayer] = useState(0), [head, setHead] = useState(0);
+  const data = useMemo(() => lab.data ? selectTrace(lab.data, layer, head) : null, [lab.data, layer, head]);
+  const expanded = data?.training_scope === "all_parameters";
+  const stages = lessonStages(!!expanded);
+  useEffect(() => { setDraft(lab.prompt); }, [lab.prompt]);
   const [stage, setStage] = useState(0),
     [token, setToken] = useState(0),
     [playing, setPlaying] = useState(false),
@@ -149,12 +154,15 @@ export default function App() {
         <span className="header-divider" />
         <span className="header-caption">THE MODEL, OPENED UP</span>
         <div className="header-right">
+          <select className="model-selector" aria-label="Active model" value={lab.engine} disabled={lab.busy || lab.pending} onChange={e => { setPlaying(false); lab.switchEngine(e.target.value as "team" | "transformer"); }}>
+            <option value="transformer">Transformer · 28k</option><option value="team">Original · 640</option>
+          </select>
           <a className="subtle-button" href="/brain.html">
             Embedding space ↗
           </a>
           <span className="live-dot" />
           {data
-            ? `${data.parameter_count} parameters · ${data.config.n_heads} attention head`
+            ? `${data.parameter_count} parameters · ${data.config.n_heads} attention head${data.config.n_heads > 1 ? "s" : ""}`
             : "Connecting to your model"}
           <button
             className="subtle-button"
@@ -394,6 +402,10 @@ export default function App() {
               ))}
             </select>
           </div>
+          {expanded && (stage === 2 || stage === 3) && <div className="block-picker">
+            <label>Layer <select aria-label="Transformer layer" value={layer} onChange={e => setLayer(+e.target.value)}>{[0,1].map(i => <option key={i} value={i}>{i+1} of 2</option>)}</select></label>
+            <label>Head <select aria-label="Attention head" value={head} onChange={e => setHead(+e.target.value)}>{[0,1].map(i => <option key={i} value={i}>{i+1} of 2</option>)}</select></label>
+          </div>}
           <div className="equation">
             <span>THE OPERATION</span>
             <code>
@@ -406,7 +418,7 @@ export default function App() {
             <div className="stage-values" key={`${stage}-${row}`}>
               {stage === 0 && (
                 <Values
-                  label={`Character “${tokenLabel(data.trace.tokens[row])}” · 4 dimensions`}
+                  label={`Character “${tokenLabel(data.trace.tokens[row])}” · ${data.config.d_model} dimensions`}
                   values={data.trace.token_embeddings[row]}
                 />
               )}
@@ -458,10 +470,11 @@ export default function App() {
                         </div>
                       ))}
                   </div>
-                  <Values
-                    label="Weighted values · A × V"
-                    values={data.trace.blocks[0].head_outputs[0][0][row]}
-                  />
+                  <Values label="Weighted values · A × V (selected head)" values={data.trace.blocks[0].head_outputs[0][0][row]} />
+                  {expanded && <details className="block-details"><summary>Inside this transformer block</summary>
+                    {(["attention_projection", "attention_residual", "normalized_ff_input", "ff_pre_activation", "ff_activation", "ff_projection", "output"] as const).map((field, i) => <Values key={field} label={["Joined heads → projection", "First residual addition", "Normalize for feed-forward", "Expand to 128 values", "GELU activation", "Project back to 32", "Second residual → next layer"][i]} values={data.trace.selected_block![field]![0][row]} />)}
+                  </details>}
+
                 </>
               )}
               {stage === 4 && (
@@ -472,9 +485,9 @@ export default function App() {
                   </p>
                   <Values
                     label="Final hidden representation"
-                    values={data.trace.blocks[0].head_outputs[0][0].at(-1)!}
+                    values={data.trace.final_hidden ?? data.trace.blocks[0].head_outputs[0][0].at(-1)!}
                   />
-                  <div className="weight-matrix" aria-label="Output weights">
+                  <div className="weight-matrix" aria-label="Output weights" style={{ gridTemplateColumns: `repeat(${data.characters.length}, 1fr)` }}>
                     {data.trace.output_weights.flatMap((r, i) =>
                       r.map((v, j) => (
                         <span
@@ -493,7 +506,7 @@ export default function App() {
                     )}
                   </div>
                   <p className="data-caption">
-                    4 × 10 · {data.trainable_parameter_count} trainable weights{" "}
+                    {data.config.d_model} × {data.characters.length} output weights · {data.trainable_parameter_count} total trainable{" "}
                     {lab.changed
                       ? "· amber = changed since training started"
                       : ""}
@@ -664,22 +677,20 @@ export default function App() {
                     "Your continuation will appear here. Same model + settings + seed gives the same text."}
                 </pre>
                 <small>
-                  A ten-character vocabulary and a tiny training corpus:
-                  imperfect text is expected.
+                  {data?.characters.length}-character vocabulary · {expanded ? "trained on short original sentences; readable fragments are possible, but this is not a general chatbot." : "a tiny training corpus; imperfect text is expected."}
                 </small>
               </div>
             </div>
           ) : (
             <div className="learning-controls">
               <div>
-                <p className="overline">ONLY THE OUTPUT PROJECTION LEARNS</p>
+                <p className="overline">{expanded ? "EVERY PARAMETER LEARNS · NUMPY BACKPROP" : "ONLY THE OUTPUT PROJECTION LEARNS"}</p>
                 <h3>Watch the amber weights change.</h3>
                 <p>
-                  One step updates 40 output weights with SGD. The attention and
-                  embedding stages stay fixed.
+                  {expanded ? "Each step uses eight 32-character examples. Adam updates embeddings, both attention blocks, feed-forward networks and output weights." : "One step updates 40 output weights with SGD. The attention and embedding stages stay fixed."}
                 </p>
                 <p className="lab-lesson">{data?.mode === "trained" ? "You are viewing a trained checkpoint. Choose Random weights to see learning from the beginning, then train and compare the curves." : "You are learning from a fresh start. Each update uses the training sentence below; your input only changes the prediction being inspected."}</p>
-                <p className="lab-corpus">Practice: <code>{data?.training_text}</code><br />Held out: <code>{data?.validation_text}</code></p>
+                <p className="lab-corpus">Practice: <code>{data?.training_text.slice(0, 110)}{expanded ? "…" : ""}</code><br />Held out: <code>{data?.validation_text.slice(0, 80)}{expanded ? "…" : ""}</code></p>
                 <div className="learning-actions">
                   <button
                     disabled={!lab.ready}

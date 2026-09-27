@@ -60,3 +60,19 @@ export const stages = [
       "Column heights show actual probabilities, on a shared 0–100% scale. At temperature zero, the largest score is selected directly.",
   },
 ];
+
+export function lessonStages(expanded: boolean) {
+  if (!expanded) return stages;
+  const result = stages.map(s => ({ ...s }));
+  result[0].description = "Each character looks up 32 learned values. These embeddings change during training, along with every other parameter.";
+  result[2].formula = "Q, K, V = LayerNorm(X) Wqkv + b";
+  result[2].detail = "Choose either transformer layer and either head. Each head uses 16 dimensions; the projections include learned biases.";
+  result[3].short = "Attention + feed-forward";
+  result[3].formula = "R = X + concat(heads)Wo + bo; Y = R + MLP(LN(R))";
+  result[3].description = "Two heads mix earlier positions. Their concatenated outputs are projected and added to the input. A 32 → 128 → 32 GELU network follows, with another residual addition. The second block repeats this process.";
+  result[3].detail = "The inspector shows the selected layer and head. Both layers use causal masking. The feed-forward view exposes the 128 intermediate activations, not a fictitious layer.";
+  result[4].formula = "z = LayerNorm(Ylast) Wout + b";
+  result[4].description = "After both transformer blocks, final layer normalization produces 32 values. A learned 32 × 26 projection plus bias gives the next-character scores.";
+  result[4].detail = "All 28,186 parameters learn with manual NumPy backpropagation and Adam. Amber tiles highlight real output-weight changes; other layers learn too.";
+  return result;
+}

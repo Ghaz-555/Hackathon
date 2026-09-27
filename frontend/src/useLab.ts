@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { api, ApiError, type Inspection, type ModelState } from "./api";
 // Share only session creation, not model state, across StrictMode effect checks.
 let boot: Promise<string> | null = null;
-function session() {
+function session(engine: "team" | "transformer") {
   if (!boot)
     boot = (async () => {
-      const old = sessionStorage.getItem("glasswork-session");
+      const old = sessionStorage.getItem(`glasswork-session-${engine}`);
       if (old) {
         try {
           await api(`/sessions/${old}`);
@@ -14,8 +14,8 @@ function session() {
           if (!(e instanceof ApiError && e.status === 404)) throw e;
         }
       }
-      const value = await api<{ session_id: string }>("/sessions", {});
-      sessionStorage.setItem("glasswork-session", value.session_id);
+      const value = await api<{ session_id: string }>("/sessions", { engine });
+      sessionStorage.setItem(`glasswork-session-${engine}`, value.session_id);
       return value.session_id;
     })().catch((e) => {
       boot = null;
@@ -33,6 +33,7 @@ function savedSettings(): { prompt: string; temperature: number } {
   } catch { return { prompt: "the cat", temperature: 1 }; }
 }
 export function useLab() {
+  const [engine, setEngine] = useState<"team" | "transformer">(() => sessionStorage.getItem("glasswork-engine") === "team" ? "team" : "transformer");
   const [sid, setSid] = useState(""),
     [data, setData] = useState<Inspection | null>(null),
     [error, setError] = useState("");
@@ -57,9 +58,9 @@ export function useLab() {
     );
   useEffect(() => {
     let alive = true;
-    session()
+    session(engine)
       .then((s) => {
-        if (alive) setSid(s);
+        if (alive) { sessionStorage.setItem("glasswork-session", s); setSid(s); }
       })
       .catch((e) => {
         if (alive) {
@@ -70,7 +71,7 @@ export function useLab() {
     return () => {
       alive = false;
     };
-  }, [retry]);
+  }, [retry, engine]);
   useEffect(() => {
     if (!sid) return;
     // A slow response from an older prompt must never replace a newer trace.
@@ -194,7 +195,17 @@ export function useLab() {
     setPending(true);
     setRetry((v) => v + 1);
   }
+  function switchEngine(value: "team" | "transformer") {
+    if (operation.current || value === engine) return;
+    sequence.current++;
+    boot = null;
+    setSid(""); setData(null); setError(""); setPending(true);
+    setPrompt("the cat"); setSample(""); setChanged(null); setCompleted(0);
+    sessionStorage.setItem("glasswork-engine", value);
+    setEngine(value);
+  }
   return {
+    engine, switchEngine,
     data,
     error,
     setError,

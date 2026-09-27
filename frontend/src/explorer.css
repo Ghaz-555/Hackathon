@@ -1262,3 +1262,14 @@ body {
 .lab-message { padding:12px; background:#f9ddbe; border-radius:6px; font-size:12px; }
 .lab-message button { margin-left:8px; }
 @media(prefers-reduced-motion:reduce) { .lab-probabilities span { transition:none; } }
+
+.model-selector,.block-picker select { background:#12232b; color:#bfe3d4; border:1px solid #36514e; padding:7px; border-radius:6px; font:11px inherit; max-width:150px; }
+.block-picker { display:flex; gap:12px; margin:12px 0; font-size:11px; }
+.block-picker label { display:flex; flex-direction:column; gap:6px; }
+.block-details { margin-top:18px; font-size:12px; }
+.block-details .vector > div { flex-wrap:wrap; }
+.stage-values .vector > div { flex-wrap:wrap; }
+.lab-corpus { max-height:85px; overflow:auto; }
+.lab-probabilities { overflow-x:auto; }
+.lab-probabilities > div { min-width:15px; }
+.weight-matrix { max-height:160px; overflow:auto; }

@@ -1,0 +1,50 @@
+/home/sawoo/Hackathon-main2/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_api_matches_engine_and_temperature_preserves_weights (test_api.ApiTests.test_api_matches_engine_and_temperature_preserves_weights) ... ok
+test_bad_prompt_does_not_mutate_weights_and_limits_are_enforced (test_api.ApiTests.test_bad_prompt_does_not_mutate_weights_and_limits_are_enforced) ... ok
+test_concurrent_mutations_cannot_both_use_same_revision (test_api.ApiTests.test_concurrent_mutations_cannot_both_use_same_revision) ... ok
+test_health_and_missing_checkpoint (test_api.ApiTests.test_health_and_missing_checkpoint) ... ok
+test_seeded_sampling_and_reset_restore_checkpoint_exactly (test_api.ApiTests.test_seeded_sampling_and_reset_restore_checkpoint_exactly) ... ok
+test_session_capacity_deletion_and_expiry (test_api.ApiTests.test_session_capacity_deletion_and_expiry) ... ok
+test_training_changes_only_its_session_and_stale_mutation_is_rejected (test_api.ApiTests.test_training_changes_only_its_session_and_stale_mutation_is_rejected) ... ok
+test_adam_first_step_matches_hand_calculation (test_engine.EngineTests.test_adam_first_step_matches_hand_calculation) ... ok
+test_attention_trace_is_real_normalized_and_causal (test_engine.EngineTests.test_attention_trace_is_real_normalized_and_causal) ... ok
+test_checkpoint_rejects_corruption_and_unknown_versions (test_engine.EngineTests.test_checkpoint_rejects_corruption_and_unknown_versions) ... ok
+test_checkpoint_restores_predictions_and_exact_next_training_step (test_engine.EngineTests.test_checkpoint_restores_predictions_and_exact_next_training_step) ... ok
+test_clipping_and_bad_gradient_updates_are_atomic (test_engine.EngineTests.test_clipping_and_bad_gradient_updates_are_atomic) ... ok
+test_dataset_split_has_no_duplicate_sentences_and_known_characters (test_engine.EngineTests.test_dataset_split_has_no_duplicate_sentences_and_known_characters) ... ok
+test_evaluation_and_generation_do_not_change_training_rng (test_engine.EngineTests.test_evaluation_and_generation_do_not_change_training_rng) ... ok
+test_evaluation_weights_partial_final_chunk_by_target_count (test_engine.EngineTests.test_evaluation_weights_partial_final_chunk_by_target_count) ... ok
+test_every_parameter_gradient_against_central_difference (test_engine.EngineTests.test_every_parameter_gradient_against_central_difference) ... ok
+test_future_tokens_cannot_change_prefix_logits (test_engine.EngineTests.test_future_tokens_cannot_change_prefix_logits) ... ok
+test_invalid_inputs_fail_clearly (test_engine.EngineTests.test_invalid_inputs_fail_clearly) ... ok
+test_layer_norm_constant_input_and_shift_invariance (test_engine.EngineTests.test_layer_norm_constant_input_and_shift_invariance) ... ok
+test_logits_and_loss_are_stable_at_large_magnitudes (test_engine.EngineTests.test_logits_and_loss_are_stable_at_large_magnitudes) ... ok
+test_seed_reproducibility_and_batch_independence (test_engine.EngineTests.test_seed_reproducibility_and_batch_independence) ... ok
+test_single_token_and_full_context_backward_are_finite_and_read_only (test_engine.EngineTests.test_single_token_and_full_context_backward_are_finite_and_read_only) ... ok
+test_temperature_changes_distribution_without_changing_weights (test_engine.EngineTests.test_temperature_changes_distribution_without_changing_weights) ... ok
+test_tiny_dataset_can_be_overfit (test_engine.EngineTests.test_tiny_dataset_can_be_overfit) ... ok
+test_tokenizer_unicode_round_trip_and_unknown_rejection (test_engine.EngineTests.test_tokenizer_unicode_round_trip_and_unknown_rejection) ... ok
+test_two_layer_gradients_across_residual_paths (test_engine.EngineTests.test_two_layer_gradients_across_residual_paths) ... ok
+test_3d_trace_reconstructs_each_displayed_operation (test_team_engine.TeamEngineTests.test_3d_trace_reconstructs_each_displayed_operation) ... ok
+test_all_output_and_hidden_gradients_against_finite_differences (test_team_engine.TeamEngineTests.test_all_output_and_hidden_gradients_against_finite_differences) ... ok
+test_capture_is_read_only_and_does_not_change_predictions (test_team_engine.TeamEngineTests.test_capture_is_read_only_and_does_not_change_predictions) ... ok
+test_checkpoint_restores_exact_next_update_and_generation (test_team_engine.TeamEngineTests.test_checkpoint_restores_exact_next_update_and_generation) ... ok
+test_greedy_temperature_and_extreme_logits_are_stable (test_team_engine.TeamEngineTests.test_greedy_temperature_and_extreme_logits_are_stable) ... ok
+test_learning_changes_only_declared_output_parameters (test_team_engine.TeamEngineTests.test_learning_changes_only_declared_output_parameters) ... ok
+test_local_initialization_seed_and_normalized_training (test_team_engine.TeamEngineTests.test_local_initialization_seed_and_normalized_training) ... ok
+test_original_source_forward_update_and_generation_parity (test_team_engine.TeamEngineTests.test_original_source_forward_update_and_generation_parity) ... ok
+test_request_limits_include_normalized_context (test_team_engine.TeamEngineTests.test_request_limits_include_normalized_context) ... ok
+test_trace_preserves_source_attention_and_causality (test_team_engine.TeamEngineTests.test_trace_preserves_source_attention_and_causality) ... ok
+test_checkpoint_quality_and_repeatable_generation (test_transformer_api.TransformerApiTests.test_checkpoint_quality_and_repeatable_generation) ... ok
+test_session_reset_restore_and_context_validation (test_transformer_api.TransformerApiTests.test_session_reset_restore_and_context_validation) ... ok
+test_trace_reconstructs_logits_and_all_parameters_learn (test_transformer_api.TransformerApiTests.test_trace_reconstructs_logits_and_all_parameters_learn) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 2.582s
+
+OK
+
+Central differences: 223 parameters; max absolute error=9.175e-08
+Overfit check: loss 0.695950 -> 0.001205
+Team gradients: 40 output weights + 4 hidden values; max output error=2.602e-11

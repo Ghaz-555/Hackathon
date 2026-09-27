@@ -19,7 +19,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 import type { Inspection } from "./api";
 import { tokenLabel } from "./api";
-import { stages } from "./stages";
+import { lessonStages } from "./stages";
 
 type Point = [number, number, number];
 type Props = {
@@ -312,6 +312,7 @@ function OutputBars({
 }) {
   const group = useRef<THREE.Group>(null);
   const current = useRef(data.probabilities.map((p) => p * 2.5));
+  const pitch = 2.8 / data.characters.length;
   useFrame((_, dt) => {
     group.current?.children.forEach((child, i) => {
       const target = data.probabilities[i] * 2.5;
@@ -333,7 +334,7 @@ function OutputBars({
         {data.probabilities.map((p, i) => (
           <mesh
             key={i}
-            position={[(i - 4.5) * 0.28, p * 1.25, 0]}
+            position={[(i - (data.characters.length - 1) / 2) * pitch, p * 1.25, 0]}
             scale={[1, Math.max(p * 2.5, 0.00001), 1]}
             visible={p > 0}
             onPointerMove={(e) => {
@@ -343,7 +344,7 @@ function OutputBars({
               );
             }}
           >
-            <boxGeometry args={[0.2, 1, 0.23]} />
+            <boxGeometry args={[pitch * 0.74, 1, 0.23]} />
             <meshStandardMaterial
               color="#b8f188"
               emissive="#94d076"
@@ -357,7 +358,7 @@ function OutputBars({
       {data.characters.map((c, i) => (
         <Html
           key={i}
-          position={[(i - 4.5) * 0.28, -0.22, 0]}
+          position={[(i - (data.characters.length - 1) / 2) * pitch, -0.22, 0]}
           center
           style={{ pointerEvents: "none" }}
         >
@@ -461,6 +462,8 @@ function CameraRig({
 function World(props: Props) {
   const { data, stage, token, onStage, onValue } = props;
   const { gl } = useThree();
+  const expanded = data.training_scope === "all_parameters";
+  const stages = lessonStages(expanded);
   const controls = useRef<OrbitControlsImpl>(null);
   const motion = !props.reduced;
   const start = Math.max(0, Math.min(token - 7, data.trace.tokens.length - 16)),
@@ -701,11 +704,15 @@ function World(props: Props) {
                   causal: true,
                 },
               )}
+              {expanded && <group position={[0, 0, -2.7]}>
+                {tensor(rows(data.trace.selected_block!.ff_activation![0]).map(r => r.slice(0, 16)), "#f3bd8d", `LAYER ${(data.trace.layer_index ?? 0)+1} · GELU (16 / 128 channels)`, i, {size:2.2, selected:token-start, offset:start})}
+                <Line points={[[0,1.5,0],[-1.8,1.5,0],[-1.8,-1.5,2.7],[0,-1.5,2.7]]} color="#f3bd8d" dashed dashSize={0.12} gapSize={0.1} />
+              </group>}
               <group position={[0, -2.25, 0]}>
                 {tensor(
-                  [data.trace.blocks[0].head_outputs[0][0].at(-1)!],
+                  [data.trace.final_hidden ?? data.trace.blocks[0].head_outputs[0][0].at(-1)!],
                   "#9bd5e5",
-                  "FINAL h = (A × V)last",
+                  expanded ? "FINAL LAYERNORM · BOTH BLOCKS" : "FINAL h = (A × V)last",
                   i,
                   { size: 1.6 },
                 )}
@@ -718,7 +725,7 @@ function World(props: Props) {
                 {tensor(
                   data.trace.output_weights,
                   item.color,
-                  "Wout · 40 TRAINABLE",
+                  `Wout · ${data.config.d_model} × ${data.characters.length}`,
                   i,
                   { size: 2.5, changed: props.changed },
                 )}
@@ -727,7 +734,7 @@ function World(props: Props) {
                 {tensor(
                   [data.logits],
                   "#e9d5a4",
-                  "LOGITS = h × Wout",
+                  expanded ? "LOGITS = h × Wout + b" : "LOGITS = h × Wout",
                   i,
                   { size: 2.5 },
                 )}
