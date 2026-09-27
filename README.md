@@ -1,5 +1,5 @@
 # GlassBox
-
+**A Glasswork in a GlassBox...**
 **Step inside a prediction.** Watch a character become a vector, follow attention through a small transformer, train its weights, and explore the real embedding space of GPT-2.
 
 Built with **NumPy math and manual backpropagation**, React, Three.js, and FastAPI. No PyTorch, TensorFlow, or model-training framework.
