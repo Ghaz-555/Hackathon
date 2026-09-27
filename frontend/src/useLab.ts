@@ -23,12 +23,21 @@ function session() {
     });
   return boot;
 }
+function savedSettings(): { prompt: string; temperature: number } {
+  try {
+    const value = JSON.parse(sessionStorage.getItem("glasswork-settings") || "{}");
+    return {
+      prompt: typeof value.prompt === "string" && value.prompt.length > 0 && value.prompt.length <= 128 ? value.prompt : "the cat",
+      temperature: Number.isFinite(value.temperature) && value.temperature >= 0 && value.temperature <= 2 ? value.temperature : 1,
+    };
+  } catch { return { prompt: "the cat", temperature: 1 }; }
+}
 export function useLab() {
   const [sid, setSid] = useState(""),
     [data, setData] = useState<Inspection | null>(null),
     [error, setError] = useState("");
-  const [prompt, setPrompt] = useState("the cat"),
-    [temperature, setTemperature] = useState(1),
+  const [prompt, setPrompt] = useState(() => savedSettings().prompt),
+    [temperature, setTemperature] = useState(() => savedSettings().temperature),
     [busy, setBusy] = useState(false),
     [pending, setPending] = useState(true);
   const [sample, setSample] = useState(""),
@@ -36,6 +45,10 @@ export function useLab() {
     [completed, setCompleted] = useState(0),
     [changed, setChanged] = useState<number[][] | null>(null);
   const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    sessionStorage.setItem("glasswork-settings", JSON.stringify({ prompt, temperature }));
+  }, [prompt, temperature]);
+  const operation = useRef(false);
   const sequence = useRef(0),
     stop = useRef(false);
   const fail = (e: unknown) =>
@@ -89,6 +102,8 @@ export function useLab() {
     };
   }, [sid, prompt, temperature, retry]);
   async function generate(seed: number) {
+    if (operation.current || !data || pending) return;
+    operation.current = true;
     setBusy(true);
     setError("");
     try {
@@ -102,11 +117,13 @@ export function useLab() {
     } catch (e) {
       fail(e);
     } finally {
+      operation.current = false;
       setBusy(false);
     }
   }
   async function reset(mode: "random" | "trained") {
-    if (!data) return;
+    if (!data || operation.current || pending) return;
+    operation.current = true;
     setBusy(true);
     setChanged(null);
     setSample("");
@@ -126,11 +143,13 @@ export function useLab() {
     } catch (e) {
       fail(e);
     } finally {
+      operation.current = false;
       setBusy(false);
     }
   }
   async function train(count: number) {
-    if (!data) return;
+    if (!data || operation.current || pending) return;
+    operation.current = true;
     setBusy(true);
     setTraining(true);
     setError("");
@@ -161,16 +180,16 @@ export function useLab() {
     } catch (e) {
       fail(e);
     } finally {
+      operation.current = false;
       setBusy(false);
       setTraining(false);
     }
   }
   async function recover() {
-    if (sid) await api(`/sessions/${sid}`, undefined, "DELETE").catch(() => {});
+    if (operation.current) return;
+    // Revalidate the existing session. Only session() replaces an expired one;
+    // a network failure or invalid input must not erase trained weights.
     boot = null;
-    sessionStorage.removeItem("glasswork-session");
-    setSid("");
-    setData(null);
     setError("");
     setPending(true);
     setRetry((v) => v + 1);

@@ -1251,3 +1251,14 @@ body {
 .scene-container { padding-top: 205px; }
 .diagram-view { padding-top: 35px; }
 @media(max-width:780px) { .scene-container { height: 720px; } .diagram-view { padding-top: 35px; } }
+
+/* Keep the experiment's result beside the control that changes it. */
+.lab-probabilities { display:flex; align-items:flex-end; gap:5px; height:130px; margin-top:12px; }
+.lab-probabilities > div { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.lab-probabilities span { width:75%; background:linear-gradient(#78ae6a,#456c49); border-radius:3px 3px 0 0; transition:height .3s; }
+.lab-probabilities b { font:12px monospace; }
+.lab-probabilities small { font-size:8px; }
+.lab-caption,.lab-corpus { font-size:10px; line-height:1.7; }
+.lab-message { padding:12px; background:#f9ddbe; border-radius:6px; font-size:12px; }
+.lab-message button { margin-left:8px; }
+@media(prefers-reduced-motion:reduce) { .lab-probabilities span { transition:none; } }

@@ -65,7 +65,7 @@ export default function App() {
     [playing, setPlaying] = useState(false),
     [focus, setFocus] = useState(false),
     [cameraReset, setCameraReset] = useState(0);
-  const [draft, setDraft] = useState("the cat"),
+  const [draft, setDraft] = useState(lab.prompt),
     [drawer, setDrawer] = useState<"sample" | "train" | null>(null),
     [seed, setSeed] = useState(7),
     [hover, setHover] = useState("Hover over a tile to inspect its value");
@@ -598,6 +598,7 @@ export default function App() {
               <X size={19} />
             </button>
           </div>
+          {lab.error && <p className="lab-message" role="status">{lab.error} <button disabled={lab.busy} onClick={lab.recover}>Retry connection</button></p>}
           {drawer === "sample" ? (
             <div className="sampling-controls">
               <div>
@@ -623,6 +624,13 @@ export default function App() {
                   <span>0 · greedy</span>
                   <span>2 · more varied</span>
                 </div>
+                <div className="lab-probabilities" aria-label="Live sampling probabilities" aria-busy={lab.pending}>
+                  {probabilities.map(({ p, c }) => <div key={c} title={`${tokenLabel(c)}: ${(p * 100).toFixed(2)}%`}>
+                    <span style={{ height: `${p * 90 + 2}px` }} />
+                    <b>{tokenLabel(c)}</b><small>{(p * 100).toFixed(1)}%</small>
+                  </div>)}
+                </div>
+                <p className="lab-caption">{lab.pending ? "Updating distribution…" : `Entropy ${data?.entropy.toFixed(3)} nats · weights unchanged`}</p>
               </div>
               <div className="sample-box">
                 <div>
@@ -637,7 +645,7 @@ export default function App() {
                       disabled={lab.busy}
                       onChange={(e) =>
                         setSeed(
-                          Math.min(4294967295, Math.max(0, +e.target.value)),
+                          Math.min(4294967295, Math.max(0, Math.floor(+e.target.value))),
                         )
                       }
                     />
@@ -670,6 +678,8 @@ export default function App() {
                   One step updates 40 output weights with SGD. The attention and
                   embedding stages stay fixed.
                 </p>
+                <p className="lab-lesson">{data?.mode === "trained" ? "You are viewing a trained checkpoint. Choose Random weights to see learning from the beginning, then train and compare the curves." : "You are learning from a fresh start. Each update uses the training sentence below; your input only changes the prediction being inspected."}</p>
+                <p className="lab-corpus">Practice: <code>{data?.training_text}</code><br />Held out: <code>{data?.validation_text}</code></p>
                 <div className="learning-actions">
                   <button
                     disabled={!lab.ready}
